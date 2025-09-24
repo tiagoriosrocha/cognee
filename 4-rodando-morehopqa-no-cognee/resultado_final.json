@@ -1,0 +1,1160 @@
+{
+    "final_answer": "The director of the 2004 film where Kam Heskin plays Paige Morgan (\"The Prince and Me\") is Martha Coolidge. Her first name, \\'Martha\\', has 5 letters between the first letter \\'M\\' and the last letter \\'a\\'. Therefore, there are 3 letters between \\'M\\' and \\'a\\': \\'a\\', \\'r\\', \\'t\\', and \\'h\\'.",
+    "graph_relations": [
+        {
+            "source_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "6bd2234d-5266-5519-bfa9-f2a746931895",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_253becda393cc4221094e8eb3cabf879"
+        },
+        {
+            "source_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "b661854d-2f9b-5b09-93f9-77be0be05db9",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "rachel elizabeth lynne mckee wallingford"
+        },
+        {
+            "source_node_id": "b661854d-2f9b-5b09-93f9-77be0be05db9",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "rachel elizabeth lynne mckee wallingford",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "6ab43a55-4965-5fcd-86ab-9173ca2848d6",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "prince adam rustenbrook"
+        },
+        {
+            "source_node_id": "6ab43a55-4965-5fcd-86ab-9173ca2848d6",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "prince adam rustenbrook",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "4ee80ec6-5e21-57ed-89df-6d3ba0e0dae0",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "isabella"
+        },
+        {
+            "source_node_id": "4ee80ec6-5e21-57ed-89df-6d3ba0e0dae0",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "isabella",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "cf26564f-f973-5899-b8d9-c7b21d61fa41",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "harvard university"
+        },
+        {
+            "source_node_id": "cf26564f-f973-5899-b8d9-c7b21d61fa41",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "harvard university",
+            "relationship_type": "is_a",
+            "target_node_id": "912b273c-683d-53ea-8ffe-aadef0b84237",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "educational institution"
+        },
+        {
+            "source_node_id": "b661854d-2f9b-5b09-93f9-77be0be05db9",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "rachel elizabeth lynne mckee wallingford",
+            "relationship_type": "partner_with",
+            "target_node_id": "6ab43a55-4965-5fcd-86ab-9173ca2848d6",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "prince adam rustenbrook"
+        },
+        {
+            "source_node_id": "6ab43a55-4965-5fcd-86ab-9173ca2848d6",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "prince adam rustenbrook",
+            "relationship_type": "engaged_to",
+            "target_node_id": "4ee80ec6-5e21-57ed-89df-6d3ba0e0dae0",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "isabella"
+        },
+        {
+            "source_node_id": "b661854d-2f9b-5b09-93f9-77be0be05db9",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "rachel elizabeth lynne mckee wallingford",
+            "relationship_type": "attends",
+            "target_node_id": "cf26564f-f973-5899-b8d9-c7b21d61fa41",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "harvard university"
+        },
+        {
+            "source_node_id": "a1d994ab-174f-5f5e-b766-1297a21323ff",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "803c8a2a-b00a-50a6-8b0f-9f813d689532",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "8ec3f4cf-7570-55ec-adc0-d3e28050a514",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_0d8bce0ea5edd9bf132de26723b43b94"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "the prince and me",
+            "relationship_type": "is_a",
+            "target_node_id": "5f710d9d-8811-5cfb-9175-c5c0533b82ca",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "film"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "1c877e38-afdb-5af9-bfa1-c14235256bbe",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "martha coolidge"
+        },
+        {
+            "source_node_id": "1c877e38-afdb-5af9-bfa1-c14235256bbe",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "martha coolidge",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "f3200ed9-17c6-5dd2-8dfb-80aea2e6eae0",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "julia stiles"
+        },
+        {
+            "source_node_id": "f3200ed9-17c6-5dd2-8dfb-80aea2e6eae0",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "julia stiles",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "f7210df6-380d-597c-a594-72ee0854a798",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "luke mably"
+        },
+        {
+            "source_node_id": "f7210df6-380d-597c-a594-72ee0854a798",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "luke mably",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "0e4a3e56-5a6b-5b46-8076-38b5f7c457dc",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "ben miller"
+        },
+        {
+            "source_node_id": "0e4a3e56-5a6b-5b46-8076-38b5f7c457dc",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "ben miller",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "48355aef-4600-5836-a677-65d05d620689",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "miranda richardson"
+        },
+        {
+            "source_node_id": "48355aef-4600-5836-a677-65d05d620689",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "miranda richardson",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "96d41bf3-11c9-50c5-9094-a27db839e3d7",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "james fox"
+        },
+        {
+            "source_node_id": "96d41bf3-11c9-50c5-9094-a27db839e3d7",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "james fox",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "664d4c41-2b73-5130-9001-35cb8940b2b5",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "alberta watson"
+        },
+        {
+            "source_node_id": "664d4c41-2b73-5130-9001-35cb8940b2b5",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "alberta watson",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "1c877e38-afdb-5af9-bfa1-c14235256bbe",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "martha coolidge",
+            "relationship_type": "directed",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "f3200ed9-17c6-5dd2-8dfb-80aea2e6eae0",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "julia stiles",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "f7210df6-380d-597c-a594-72ee0854a798",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "luke mably",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "0e4a3e56-5a6b-5b46-8076-38b5f7c457dc",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "ben miller",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "48355aef-4600-5836-a677-65d05d620689",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "miranda richardson",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "96d41bf3-11c9-50c5-9094-a27db839e3d7",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "james fox",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "664d4c41-2b73-5130-9001-35cb8940b2b5",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "alberta watson",
+            "relationship_type": "acted_in",
+            "target_node_id": "87b90780-ba84-50e2-a755-23e6d86cfe4c",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "the prince and me"
+        },
+        {
+            "source_node_id": "8a482888-319d-55b7-ab1c-a189f1bb1f43",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "c46c7299-bd5e-5b7e-bed8-3a8edd55e4ef",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "202307f9-4c39-5d19-83cd-fc409a4da344",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "b7b44485-5140-5e53-bd4b-67dad111a264",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_be7a9849b7da3fe3ac22de8ce398250d"
+        },
+        {
+            "source_node_id": "202307f9-4c39-5d19-83cd-fc409a4da344",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "66127932-b89f-5cac-bfb3-8132b4119cbd",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "paige morgan"
+        },
+        {
+            "source_node_id": "66127932-b89f-5cac-bfb3-8132b4119cbd",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "paige morgan",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "202307f9-4c39-5d19-83cd-fc409a4da344",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "9249c2a3-2ba6-55d6-b2e6-3917982c2ce4",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "wisconsin college"
+        },
+        {
+            "source_node_id": "9249c2a3-2ba6-55d6-b2e6-3917982c2ce4",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "wisconsin college",
+            "relationship_type": "is_a",
+            "target_node_id": "b5866225-05ad-5cfc-908e-c22916c6a1c6",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "institution"
+        },
+        {
+            "source_node_id": "202307f9-4c39-5d19-83cd-fc409a4da344",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "21d19d74-b14b-5c0a-9272-20904a2f8c73",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "prince"
+        },
+        {
+            "source_node_id": "21d19d74-b14b-5c0a-9272-20904a2f8c73",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "prince",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "66127932-b89f-5cac-bfb3-8132b4119cbd",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "paige morgan",
+            "relationship_type": "attends_college",
+            "target_node_id": "9249c2a3-2ba6-55d6-b2e6-3917982c2ce4",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "wisconsin college"
+        },
+        {
+            "source_node_id": "21d19d74-b14b-5c0a-9272-20904a2f8c73",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "prince",
+            "relationship_type": "is_attending_as_student",
+            "target_node_id": "9249c2a3-2ba6-55d6-b2e6-3917982c2ce4",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "wisconsin college"
+        },
+        {
+            "source_node_id": "21d19d74-b14b-5c0a-9272-20904a2f8c73",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "prince",
+            "relationship_type": "pursues",
+            "target_node_id": "66127932-b89f-5cac-bfb3-8132b4119cbd",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "paige morgan"
+        },
+        {
+            "source_node_id": "600d54cd-da0e-54ae-a34b-d9bb610b0ac5",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "202307f9-4c39-5d19-83cd-fc409a4da344",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "bf38ebae-0596-568b-9fe0-b3701593714b",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "00d51dc4-ab2d-5273-8c03-7ab752c67e66",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_c848f59aad5b304add1773efba5b0762"
+        },
+        {
+            "source_node_id": "bf38ebae-0596-568b-9fe0-b3701593714b",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "bfae514a-cfed-5429-8295-a1db7a7e2241",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "kam heskin"
+        },
+        {
+            "source_node_id": "bfae514a-cfed-5429-8295-a1db7a7e2241",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "kam heskin",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "a3fd9106-22d0-59f6-9e18-623837f5bb35",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "bf38ebae-0596-568b-9fe0-b3701593714b",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "c6ed7572-c45f-545a-9132-33f2bd098534",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "504ca5bf-22f3-5b34-b4e4-a7360a60e156",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_e90368fc3d2373bd3c7bb487f20db2c3"
+        },
+        {
+            "source_node_id": "c6ed7572-c45f-545a-9132-33f2bd098534",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "bfae514a-cfed-5429-8295-a1db7a7e2241",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "kam heskin"
+        },
+        {
+            "source_node_id": "c6ed7572-c45f-545a-9132-33f2bd098534",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "7c44945b-5e7e-50f2-951c-c5c3cf956def",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "may 8, 1973"
+        },
+        {
+            "source_node_id": "7c44945b-5e7e-50f2-951c-c5c3cf956def",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "may 8, 1973",
+            "relationship_type": "is_a",
+            "target_node_id": "d61d99ac-b291-5666-9748-3e80e1c8b56a",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "date"
+        },
+        {
+            "source_node_id": "bfae514a-cfed-5429-8295-a1db7a7e2241",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "kam heskin",
+            "relationship_type": "born_on",
+            "target_node_id": "7c44945b-5e7e-50f2-951c-c5c3cf956def",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "may 8, 1973"
+        },
+        {
+            "source_node_id": "b346c2da-0828-51ac-ab6a-fa53ca660310",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "c6ed7572-c45f-545a-9132-33f2bd098534",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "8a8ca1ef-f376-54dd-b953-c22abe24c8b4",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_01a827d5156ebe7bf6384321dae464f9"
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "c99c709d-40e9-54e5-9e39-a17847de064d",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "emily waters"
+        },
+        {
+            "source_node_id": "c99c709d-40e9-54e5-9e39-a17847de064d",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "emily waters",
+            "relationship_type": "is_a",
+            "target_node_id": "d072ba0f-e1a9-58bf-9974-e1802adc8134",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "person"
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "0751aa74-7c76-5f8e-b010-48220486308f",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "sunset beach"
+        },
+        {
+            "source_node_id": "0751aa74-7c76-5f8e-b010-48220486308f",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "sunset beach",
+            "relationship_type": "is_a",
+            "target_node_id": "42614f2a-3500-5138-bad9-1342debd89ab",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "show"
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "8aa64ba6-ba09-5b65-943a-3c8838d6713f",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "caitlin richards deschanel"
+        },
+        {
+            "source_node_id": "8aa64ba6-ba09-5b65-943a-3c8838d6713f",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "caitlin richards deschanel",
+            "relationship_type": "is_a",
+            "target_node_id": "8d028578-29b1-5264-b16c-a3707ca7d5fc",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "character"
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "bdc8c391-616f-5946-adc7-f34d0c5a8ae1",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "\"planet of the apes\""
+        },
+        {
+            "source_node_id": "bdc8c391-616f-5946-adc7-f34d0c5a8ae1",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "\"planet of the apes\"",
+            "relationship_type": "is_a",
+            "target_node_id": "fee17662-f962-5bba-ab3c-1f889a7a6b40",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "movie"
+        },
+        {
+            "source_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "contains",
+            "target_node_id": "f3476890-7a15-53be-bb83-c2ce82152d64",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "\"catch me if you can\""
+        },
+        {
+            "source_node_id": "f3476890-7a15-53be-bb83-c2ce82152d64",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "\"catch me if you can\"",
+            "relationship_type": "is_a",
+            "target_node_id": "fee17662-f962-5bba-ab3c-1f889a7a6b40",
+            "target_node_labels": [
+                "__Node__",
+                "EntityType"
+            ],
+            "target_node_name": "movie"
+        },
+        {
+            "source_node_id": "c99c709d-40e9-54e5-9e39-a17847de064d",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "emily waters",
+            "relationship_type": "played_role",
+            "target_node_id": "8aa64ba6-ba09-5b65-943a-3c8838d6713f",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "caitlin richards deschanel"
+        },
+        {
+            "source_node_id": "8aa64ba6-ba09-5b65-943a-3c8838d6713f",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "caitlin richards deschanel",
+            "relationship_type": "part_of_show",
+            "target_node_id": "0751aa74-7c76-5f8e-b010-48220486308f",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "sunset beach"
+        },
+        {
+            "source_node_id": "c99c709d-40e9-54e5-9e39-a17847de064d",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "emily waters",
+            "relationship_type": "acted_in",
+            "target_node_id": "bdc8c391-616f-5946-adc7-f34d0c5a8ae1",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "\"planet of the apes\""
+        },
+        {
+            "source_node_id": "c99c709d-40e9-54e5-9e39-a17847de064d",
+            "source_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "source_node_name": "emily waters",
+            "relationship_type": "acted_in",
+            "target_node_id": "f3476890-7a15-53be-bb83-c2ce82152d64",
+            "target_node_labels": [
+                "__Node__",
+                "Entity"
+            ],
+            "target_node_name": "\"catch me if you can\""
+        },
+        {
+            "source_node_id": "524ad814-ed95-55c5-9e72-2a31a60c1b92",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "fcab629e-3a6d-5e4b-a74b-2563b1bc3211",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        },
+        {
+            "source_node_id": "b305d008-869a-5537-a27c-8fd759b0f685",
+            "source_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "source_node_name": null,
+            "relationship_type": "is_part_of",
+            "target_node_id": "a9b46fa4-3da3-5eda-a9f0-09fc95920fa8",
+            "target_node_labels": [
+                "__Node__",
+                "TextDocument"
+            ],
+            "target_node_name": "text_986e4ef18b400a6074fc04116fc4f4bd"
+        },
+        {
+            "source_node_id": "17b2d4f2-f6ea-5012-8d8d-0f93a7c716df",
+            "source_node_labels": [
+                "__Node__",
+                "TextSummary"
+            ],
+            "source_node_name": null,
+            "relationship_type": "made_from",
+            "target_node_id": "b305d008-869a-5537-a27c-8fd759b0f685",
+            "target_node_labels": [
+                "__Node__",
+                "DocumentChunk"
+            ],
+            "target_node_name": null
+        }
+    ]
+}

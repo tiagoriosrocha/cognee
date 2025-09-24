@@ -1,0 +1,83 @@
+[
+  {
+    "source_id": "79f9d779-97b0-5a42-9b20-518a4fcf7376",
+    "source_labels": [
+      "__Node__",
+      "DocumentChunk"
+    ],
+    "source_properties": {
+      "text": "Maheen Khan\nMaheen Khan is a Pakistani fashion and costume designer, also an award winner fashion designer for fashion labels like\" The Embroidery HouseMaheen\" and\" Gulabo\". She has done many national ...[TRUNCADO]",
+      "ontology_valid": false,
+      "topological_rank": 0,
+      "contains": [],
+      "type": "DocumentChunk",
+      "version": 1,
+      "id": "79f9d779-97b0-5a42-9b20-518a4fcf7376",
+      "chunk_index": 0,
+      "chunk_size": 1731,
+      "updated_at": 1757342836520,
+      "cut_type": "sentence_end",
+      "created_at": 1757342784832,
+      "metadata": "{\"index_fields\": [\"text\"]}"
+    },
+    "relationship": "is_part_of",
+    "target_id": "e9c14b25-114b-5197-a14e-6d2bce569d24",
+    "target_labels": [
+      "__Node__",
+      "TextDocument"
+    ],
+    "target_properties": {
+      "id": "e9c14b25-114b-5197-a14e-6d2bce569d24",
+      "updated_at": 1757342836520,
+      "raw_data_location": "file:///home/tiagoriosrocha/Documents/cognee/.venv/lib/python3.12/site-packages/cognee/.data_storage/text_4caab04bd85606889fcac638d9b6a2af.txt",
+      "mime_type": "text/plain",
+      "name": "text_4caab04bd85606889fcac638d9b6a2af",
+      "ontology_valid": false,
+      "created_at": 1757342783571,
+      "topological_rank": 0,
+      "external_metadata": "{}",
+      "type": "TextDocument",
+      "metadata": "{\"index_fields\": [\"name\"]}",
+      "version": 1
+    }
+  },
+  {
+    "source_id": "aa440030-e0df-57b0-a01d-614fac8dbbcb",
+    "source_labels": [
+      "__Node__",
+      "TextSummary"
+    ],
+    "source_properties": {
+      "id": "aa440030-e0df-57b0-a01d-614fac8dbbcb",
+      "text": "The document describes notable individuals including Maheen Khan, a prominent Pakistani fashion designer; Viktor Yeliseyev, a Russian general and music conductor; Alice Washburn, an American actress k ...[TRUNCADO]",
+      "updated_at": 1757342836520,
+      "ontology_valid": false,
+      "created_at": 1757342833186,
+      "topological_rank": 0,
+      "type": "TextSummary",
+      "metadata": "{\"index_fields\": [\"text\"]}",
+      "version": 1
+    },
+    "relationship": "made_from",
+    "target_id": "79f9d779-97b0-5a42-9b20-518a4fcf7376",
+    "target_labels": [
+      "__Node__",
+      "DocumentChunk"
+    ],
+    "target_properties": {
+      "text": "Maheen Khan\nMaheen Khan is a Pakistani fashion and costume designer, also an award winner fashion designer for fashion labels like\" The Embroidery HouseMaheen\" and\" Gulabo\". She has done many national ...[TRUNCADO]",
+      "ontology_valid": false,
+      "topological_rank": 0,
+      "contains": [],
+      "type": "DocumentChunk",
+      "version": 1,
+      "id": "79f9d779-97b0-5a42-9b20-518a4fcf7376",
+      "chunk_index": 0,
+      "chunk_size": 1731,
+      "updated_at": 1757342836520,
+      "cut_type": "sentence_end",
+      "created_at": 1757342784832,
+      "metadata": "{\"index_fields\": [\"text\"]}"
+    }
+  }
+]
