@@ -391,7 +391,7 @@ export default {
       };
 
       try {
-        const response = await fetch("http://localhost:5000/processarquery", {
+        const response = await fetch("http://localhost:5000/runquestion", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -403,8 +403,8 @@ export default {
 
         const data = await response.json();
 
-        this.processedAnswer = data.answer;
-        this.processedGraph = data.graph;
+        this.processedAnswer = data.final_answer;
+        this.processedGraph = data.graph_relations;
 
         this.showSnackbar("Requisição concluída com sucesso!", "success");
         console.log("Resposta da API:", data);
