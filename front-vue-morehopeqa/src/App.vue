@@ -218,9 +218,11 @@
               <v-card-text
                 class="d-flex align-center justify-center fill-height"
               >
-                <p class="text-medium-emphasis">
-                  [Gráfico Graphly será exibido aqui]
-                </p>
+                <GraphViewer
+                  :nodes="graphData.nodes"
+                  :edges="graphData.edges"
+                  @node-selected="onNodeSelected"
+                />
               </v-card-text>
             </v-card>
           </v-col>
@@ -231,7 +233,22 @@
                 Detalhes do Nodo
               </v-card-title>
               <v-card-text>
-                <p class="text-medium-emphasis">
+                <div v-if="selectedNode">
+                  <v-list dense>
+                    <v-list-item
+                      v-for="(value, key) in selectedNode"
+                      :key="key"
+                    >
+                      <v-list-item-title
+                        ><strong>{{ key }}:</strong></v-list-item-title
+                      >
+                      <v-list-item-subtitle class="wrap-text">{{
+                        value
+                      }}</v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </div>
+                <p v-else class="text-medium-emphasis">
                   Selecione um nó do grafo para ver os detalhes.
                 </p>
               </v-card-text>
@@ -251,17 +268,14 @@
                 <v-table>
                   <thead>
                     <tr>
-                      <th class="text-left">Propriedade</th>
-                      <th class="text-left">Tipo</th>
-                      <th class="text-left">Origem</th>
-                      <th class="text-left">Descrição</th>
+                      <th class="text-left">ID do Nó</th>
+                      <th class="text-left">Nome do Nó</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td colspan="4" class="text-center text-medium-emphasis">
-                        Tabela de propriedades será exibida aqui.
-                      </td>
+                    <tr v-for="(node, id) in graphData.nodes" :key="id">
+                      <td>{{ id }}</td>
+                      <td>{{ node.name }}</td>
                     </tr>
                   </tbody>
                 </v-table>
@@ -295,9 +309,16 @@
 
 <script>
 import dataset from "./dataset.json";
+//import VNetworkGraph from "v-network-graph";
+//import "v-network-graph/lib/style.css";
+import GraphViewer from "./components/GraphViewer.vue";
 
 export default {
   name: "CogneeDashboard",
+  components: {
+    //VNetworkGraph,
+    GraphViewer,
+  },
   data() {
     return {
       dataset,
@@ -326,6 +347,52 @@ export default {
       snackbarColor: "",
       processedAnswer: null,
       processedGraph: null,
+      graphData: {
+        nodes: {
+          node1: { name: "Node 1" },
+          node2: { name: "Node 2" },
+          node3: { name: "Node 3" },
+          node4: { name: "Node 4" },
+        },
+        edges: {
+          edge1: { source: "node1", target: "node2" },
+          edge2: { source: "node2", target: "node3" },
+          edge3: { source: "node3", target: "node4" },
+        },
+      },
+      graphLayout: {
+        nodeSpacing: 100,
+      },
+      selectedNode: null,
+      graphConfigs: {
+        view: {
+          scalingObjects: true,
+          layout: "force",
+          fit: true,
+          zoom: 0.8,
+        },
+        node: {
+          normal: {
+            color: "#6c8cff",
+          },
+          label: {
+            color: "#000",
+            fontFamily: "sans-serif",
+            fontSize: 10,
+            textAnchor: "start",
+          },
+        },
+        edge: {
+          normal: {
+            color: "#999",
+            width: 1,
+          },
+          label: {
+            color: "#555",
+            fontSize: 8,
+          },
+        },
+      },
     };
   },
   computed: {
@@ -404,7 +471,8 @@ export default {
         const data = await response.json();
 
         this.processedAnswer = data.final_answer;
-        this.processedGraph = data.graph_relations;
+        this.graphData.nodes = data.nodes;
+        this.graphData.edges = data.edges;
 
         this.showSnackbar("Requisição concluída com sucesso!", "success");
         console.log("Resposta da API:", data);
@@ -414,6 +482,14 @@ export default {
       } finally {
         this.processing = false;
       }
+    },
+
+    onNodeSelected(nodoClicado) {
+      console.log("pai: nodo clicado: ", nodoClicado);
+      const fullNodeData = this.graphData.nodes[nodoClicado.id]; // pega todos os campos que você definiu
+      console.table("Dados completos do nodo:", fullNodeData);
+
+      this.selectedNode = fullNodeData;
     },
 
     showSnackbar(message, color) {

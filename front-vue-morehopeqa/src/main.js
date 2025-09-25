@@ -4,6 +4,9 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import { loadFonts } from "./plugins/webfontloader";
 
+import VNetworkGraph from "v-network-graph";
+import "v-network-graph/lib/style.css";
+
 loadFonts();
 
-createApp(App).use(store).use(vuetify).mount("#app");
+createApp(App).use(store).use(VNetworkGraph).use(vuetify).mount("#app");
