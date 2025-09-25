@@ -147,140 +147,16 @@
 
         <v-divider class="my-6"></v-divider>
 
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <v-card class="pa-4" outlined>
-              <v-card-title class="text-h6 font-weight-medium">
-                Processar com Cognee
-              </v-card-title>
-              <v-card-text>
-                <v-row align="center">
-                  <v-col cols="12" md="10">
-                    <v-combobox
-                      label="Selecione o Tipo de Processamento"
-                      :items="processingOptions"
-                      item-title="text"
-                      item-value="value"
-                      v-model="selectedProcessingType"
-                      variant="outlined"
-                      density="compact"
-                      hide-details
-                    ></v-combobox>
-                  </v-col>
-                  <v-col cols="12" md="2">
-                    <v-btn
-                      color="primary"
-                      block
-                      size="large"
-                      :disabled="!selectedProcessingType || !selectedItem"
-                      :loading="processing"
-                      @click="processar"
-                    >
-                      Processar
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
+        <v-row>
+          <v-col cols="12" md="6">
+            <ProcessingDashboard
+              :selectedItem="selectedItem"
+            ></ProcessingDashboard>
           </v-col>
-        </v-row>
-
-        <v-row v-if="processedAnswer" class="mb-6">
-          <v-col cols="12">
-            <v-card class="pa-4" outlined>
-              <v-card-title class="text-h6 font-weight-medium">
-                Resultado do Processamento
-              </v-card-title>
-              <v-card-text>
-                <v-list dense>
-                  <v-list-item>
-                    <v-list-item-title
-                      ><strong>Resposta Processada:</strong></v-list-item-title
-                    >
-                    <v-list-item-subtitle class="wrap-text">
-                      {{ processedAnswer }}
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <v-divider v-if="processedAnswer" class="my-6"></v-divider>
-
-        <v-row v-if="processedAnswer">
-          <v-col cols="12" md="8">
-            <v-card class="pa-4 min-h-600" outlined>
-              <v-card-title class="text-h6 font-weight-medium">
-                Grafo do Processamento Cognee
-              </v-card-title>
-              <v-card-text
-                class="d-flex align-center justify-center fill-height"
-              >
-                <GraphViewer
-                  :nodes="graphData.nodes"
-                  :edges="graphData.edges"
-                  @node-selected="onNodeSelected"
-                />
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" md="4">
-            <v-card class="pa-4 min-h-600" outlined>
-              <v-card-title class="text-h6 font-weight-medium">
-                Detalhes do Nodo
-              </v-card-title>
-              <v-card-text>
-                <div v-if="selectedNode">
-                  <v-list dense>
-                    <v-list-item
-                      v-for="(value, key) in selectedNode"
-                      :key="key"
-                    >
-                      <v-list-item-title
-                        ><strong>{{ key }}:</strong></v-list-item-title
-                      >
-                      <v-list-item-subtitle class="wrap-text">{{
-                        value
-                      }}</v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </div>
-                <p v-else class="text-medium-emphasis">
-                  Selecione um nó do grafo para ver os detalhes.
-                </p>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <v-divider v-if="processedAnswer" class="my-6"></v-divider>
-
-        <v-row v-if="processedAnswer">
-          <v-col cols="12">
-            <v-card class="pa-4" outlined>
-              <v-card-title class="text-h6 font-weight-medium">
-                Detalhes das Propriedades do Grafo
-              </v-card-title>
-              <v-card-text>
-                <v-table>
-                  <thead>
-                    <tr>
-                      <th class="text-left">ID do Nó</th>
-                      <th class="text-left">Nome do Nó</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(node, id) in graphData.nodes" :key="id">
-                      <td>{{ id }}</td>
-                      <td>{{ node.name }}</td>
-                    </tr>
-                  </tbody>
-                </v-table>
-              </v-card-text>
-            </v-card>
+          <v-col cols="12" md="6">
+            <ProcessingDashboard
+              :selectedItem="selectedItem"
+            ></ProcessingDashboard>
           </v-col>
         </v-row>
       </v-container>
@@ -311,13 +187,15 @@
 import dataset from "./dataset.json";
 //import VNetworkGraph from "v-network-graph";
 //import "v-network-graph/lib/style.css";
-import GraphViewer from "./components/GraphViewer.vue";
+//import GraphViewer from "./components/GraphViewer.vue";
+import ProcessingDashboard from "./components/ProcessingDashboard.vue";
 
 export default {
   name: "CogneeDashboard",
   components: {
     //VNetworkGraph,
-    GraphViewer,
+    //GraphViewer,
+    ProcessingDashboard,
   },
   data() {
     return {
