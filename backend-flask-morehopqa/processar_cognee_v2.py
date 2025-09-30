@@ -1,16 +1,6 @@
 import asyncio
 import cognee
-import os
-from cognee.modules.visualization.cognee_network_visualization import (
-    cognee_network_visualization,
-)
-from cognee.infrastructure.databases.graph import get_graph_engine
-from cognee.shared.logging_utils import get_logger, setup_logging, ERROR
 from cognee.api.v1.search import SearchType
-
-from node_transformer import NodeTransformer 
-from edge_transformer import EdgeTransformer
-
 
 class ProcessarCognee:
     """
@@ -47,36 +37,37 @@ class ProcessarCognee:
         # Passo 2: Adicionar dados de contexto
         await cognee.add(context_texts)
 
-        # Passo 3: carregando a ontologia
-        ontology_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "schemaorg.rdf"
-        )   
+        # Passo 3: Criar o grafo de conhecimento
+        await cognee.cognify()
 
-        # Passo 4: Criar o grafo de conhecimento
-        await cognee.cognify(ontology_file_path=ontology_path)
-
-        # Passo 5: Executando a consultada pergunta
+        # Passo 4: Consultar o grafo com a pergunta principal
         final_answer = await cognee.search(
             query_type=SearchType.GRAPH_COMPLETION,
             query_text=question,
         )
 
-        # Passo 6: Carregando o grafo completo
-        graph_engine = await get_graph_engine()
-        graph_data = await graph_engine.get_graph_data()
+        # Passo 5: Exportar as relações do grafo
+        cypher_query_all_relations = """
+        MATCH (n)-[r]->(m)
+        RETURN
+            n.id AS source_node_id,
+            labels(n) AS source_node_labels,
+            properties(n).name as source_node_name,
+            type(r) AS relationship_type,
+            m.id AS target_node_id,
+            labels(m) AS target_node_labels,
+            properties(m).name as target_node_name
+        LIMIT 100
+        """
+        graph_relations = await cognee.search(
+            query_text=cypher_query_all_relations,
+            query_type=SearchType.CYPHER
+        )
 
-        # Passo 7: Chama os transformers e armazena o resultado completo
-        nodeTransformer = NodeTransformer()
-        transformed_nodes = nodeTransformer.transform(graph_data[0])
-
-        edgeTransformer = EdgeTransformer()
-        transformed_edges = edgeTransformer.transform(graph_data[1])
-
-        # Passo 8: Monta o dicionário final acessando o conteúdo interno de cada resultado
+        # Passo 6: Montar o dicionário de saída
         final_output = {
             "final_answer": str(final_answer).strip("[]'\""),
-            "nodes": transformed_nodes["nodes"],
-            "edges": transformed_edges["edges"],
+            "graph_relations": graph_relations,
         }
         
         return final_output

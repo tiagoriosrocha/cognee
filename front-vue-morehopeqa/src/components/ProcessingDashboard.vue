@@ -33,7 +33,16 @@
     </v-card-text>
   </v-card>
 
-  <v-divider v-if="processedAnswer" class="my-6"></v-divider>
+  <v-row v-if="processedAnswer">
+    <v-col cols="12">
+      <v-card class="pa-4 mt-2" outlined>
+        <v-card-title class="text-h6 font-weight-medium">
+          Resposta Final:
+        </v-card-title>
+        <v-card-text>{{ processedAnswer }}</v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
 
   <v-row v-if="processedAnswer">
     <v-col cols="12" md="8">
@@ -126,6 +135,21 @@
   >
     {{ snackbarMessage }}
   </v-snackbar>
+
+  <v-snackbar
+    v-model="processingSnackbar"
+    :timeout="0"
+    color="info"
+    location="bottom"
+  >
+    Processando a requisição, por favor aguarde...
+    <v-progress-circular
+      indeterminate
+      color="white"
+      class="ml-4"
+      size="20"
+    ></v-progress-circular>
+  </v-snackbar>
 </template>
 
 <script>
@@ -156,6 +180,7 @@ export default {
       snackbar: false,
       snackbarMessage: "",
       snackbarColor: "",
+      processingSnackbar: false,
       graphData: {
         nodes: {},
         edges: {},
@@ -179,7 +204,8 @@ export default {
         return;
       }
 
-      this.processing = true;
+      //this.processing = true;
+      this.processingSnackbar = true;
 
       const payload = {
         selectedQuestion: this.selectedItem,
@@ -209,7 +235,8 @@ export default {
         this.showSnackbar("Ocorreu um erro no processamento.", "error");
         console.error("Erro na requisição:", error);
       } finally {
-        this.processing = false;
+        // this.processing = false;
+        this.processingSnackbar = false;
       }
     },
     onNodeSelected(node) {

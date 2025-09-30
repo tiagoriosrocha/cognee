@@ -1,7 +1,7 @@
 # .flaskenv
 
 #Define o arquivo principal da aplicação
-FLASK_APP=app_teste.py
+FLASK_APP=app_test.py
 
 #Define a porta de execução
 FLASK_RUN_PORT=5000

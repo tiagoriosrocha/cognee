@@ -1,71 +1,46 @@
-# app.py
-import subprocess
-import sys
 import json
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+from processar_cognee_v2 import ProcessarCognee
 
-# Inicializa a aplicação Flask
+# 1. Inicializa a aplicação Flask
 app = Flask(__name__)
+CORS(app) 
 
 @app.route('/runquestion', methods=['POST'])
 def run_question():
     """
-    Endpoint que recebe um JSON, passa para um script externo e retorna a resposta.
+    Endpoint que recebe um JSON, o processa usando a classe ProcessarCognee
+    e retorna a resposta diretamente.
     """
     # 1. Obter os dados JSON da requisição
     try:
         dados_recebidos = request.get_json()
         if dados_recebidos is None:
             return jsonify({"erro": "Corpo da requisição inválido ou não é JSON."}), 400
-            
-        # ################### INÍCIO DA ALTERAÇÃO ###################
-        #
-        # Imprime o JSON recebido no terminal de forma formatada (pretty-print)
-        #print("\n================ JSON Recebido ================")
-        #print(json.dumps(dados_recebidos, indent=4, ensure_ascii=False))
-        #print("=============================================\n")
-        #
-        # #################### FIM DA ALTERAÇÃO #####################
-
     except Exception:
-        return jsonify({"erro": "Erro ao decodificar o JSON."}), 400
+        return jsonify({"erro": "Erro ao decodificar o JSON da requisição."}), 400
 
     try:
-        # 2. Converter o dicionário Python de volta para uma string JSON para enviar ao script
-        dados_para_script = json.dumps(dados_recebidos)
+        # 2. Criar uma instância da nossa classe de processamento,
+        #    passando os dados recebidos no construtor.
+        processador = ProcessarCognee(dados_recebidos)
 
-        # 3. Chamar o script 'processar_cognee.py' como um subprocesso
-        processo = subprocess.run(
-            [sys.executable, 'processar_cognee.py'],
-            input=dados_para_script,
-            capture_output=True,
-            text=True,
-            check=True,
-            encoding='utf-8' # Garante a codificação correta
-        )
-
-        # 4. A saída do script (stdout) é a nossa resposta. Convertemos de volta para JSON.
-        resposta_do_script = json.loads(processo.stdout)
+        # 3. Chamar o método que executa toda a lógica.
+        resultado_final = processador.executar()
         
-        # 5. Retornar a resposta do script para o cliente
-        return jsonify(resposta_do_script), 200
+        # 4. Retornar a resposta do processamento para o cliente.
+        return jsonify(resultado_final), 200
 
-    except FileNotFoundError:
-        return jsonify({"erro": "Script de processamento não encontrado."}), 500
-        
-    except subprocess.CalledProcessError as e:
-        erro_retornado = e.stderr.strip()
-        try:
-            erro_json = json.loads(erro_retornado)
-            return jsonify(erro_json), 500
-        except json.JSONDecodeError:
-            return jsonify({"erro": "Erro interno no script de processamento.", "detalhes": erro_retornado}), 500
+    except ValueError as e:
+        # Captura erros de validação (ex: falta de 'context' ou 'question')
+        return jsonify({"erro": "Dados de entrada inválidos.", "detalhes": str(e)}), 400
 
-    except json.JSONDecodeError:
-        return jsonify({"erro": "A resposta do script de processamento não é um JSON válido."}), 500
-        
     except Exception as e:
-        return jsonify({"erro": "Um erro inesperado ocorreu no servidor.", "detalhes": str(e)}), 500
+        # Captura qualquer outro erro que possa ocorrer durante o processamento do Cognee.
+        # É uma boa prática logar o erro completo no servidor para depuração.
+        app.logger.error(f"Erro inesperado durante o processamento: {e}", exc_info=True)
+        return jsonify({"erro": "Um erro inesperado ocorreu no servidor durante o processamento.", "detalhes": str(e)}), 500
 
 # Permite executar o servidor com 'python app.py'
 if __name__ == '__main__':
