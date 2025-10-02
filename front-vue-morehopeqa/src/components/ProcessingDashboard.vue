@@ -45,7 +45,7 @@
   </v-row>
 
   <v-row v-if="processedAnswer">
-    <v-col cols="12" md="10">
+    <v-col cols="12" md="8" v-if="selectedNode">
       <v-card class="pa-4 min-h-600" outlined>
         <v-card-title class="text-h6 font-weight-medium">
           Grafo do Processamento Cognee
@@ -60,7 +60,22 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="2">
+    <v-col cols="12" md="12" v-else>
+      <v-card class="pa-4 min-h-600" outlined>
+        <v-card-title class="text-h6 font-weight-medium">
+          Grafo do Processamento Cognee
+        </v-card-title>
+        <v-card-text class="d-flex align-center justify-center fill-height">
+          <GraphViewer
+            :nodes="graphData.nodes"
+            :edges="graphData.edges"
+            @node-selected="onNodeSelected"
+          ></GraphViewer>
+        </v-card-text>
+      </v-card>
+    </v-col>
+
+    <v-col cols="12" md="4" v-if="selectedNode">
       <v-card class="pa-4 fill-height" outlined>
         <v-card-title class="text-h6 font-weight-medium">
           Detalhes do Nodo
@@ -96,9 +111,13 @@
           <v-spacer></v-spacer>
           <!-- Botão de minimizar -->
           <v-btn icon @click="cardMinimized = !cardMinimized" size="small">
-            <v-icon>{{
-              cardMinimized ? "mdi-chevron-down" : "mdi-chevron-up"
-            }}</v-icon>
+            <v-icon>
+              {{
+                cardMinimized
+                  ? "fa-solid fa-chevron-down"
+                  : "fa-solid fa-chevron-up"
+              }}
+            </v-icon>
           </v-btn>
         </v-card-title>
 
@@ -113,13 +132,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(node, id) in graphData.nodes" :key="id">
-                  <td>{{ id }}</td>
+                <tr
+                  v-for="(node, key) in graphData.nodes"
+                  :key="node.id"
+                  :class="{
+                    'selected-row': selectedNode && selectedNode.id === node.id,
+                  }"
+                >
+                  <td>{{ key }}</td>
                   <td>{{ node.name }}</td>
                   <td>
-                    <div v-for="(value, key) in node" :key="key">
-                      <span v-if="key !== 'name'">
-                        <strong>{{ key }}:</strong>
+                    <div v-for="(value, prop) in node" :key="prop">
+                      <span v-if="prop !== 'name' && prop !== 'id'">
+                        <strong>{{ prop }}:</strong>
                         {{
                           typeof value === "object"
                             ? JSON.stringify(value)
@@ -143,7 +168,11 @@
     :color="snackbarColor"
     location="bottom"
   >
-    {{ snackbarMessage }}
+    <div class="d-flex align-center w-100">
+      <span>{{ snackbarMessage }}</span>
+      <v-spacer></v-spacer>
+      <v-icon color="white">fa-solid fa-check</v-icon>
+    </div>
   </v-snackbar>
 
   <v-snackbar
@@ -362,8 +391,12 @@ export default {
       console.error("Erro retornado pelo backend:", erro.detalhes);
     },
     onNodeSelected(node) {
-      console.log("Nodo clicado:", node);
+      if (!node) {
+        this.selectedNode = null;
+        return;
+      }
       this.selectedNode = node;
+      console.log("Node selecionado:", node.id);
     },
     showSnackbar(message, color) {
       this.snackbarMessage = message;
@@ -414,5 +447,8 @@ export default {
 .subquestions-list li {
   margin-bottom: 8px;
   line-height: 1.5;
+}
+.selected-row {
+  background-color: #e0e0e0; /* cinza claro */
 }
 </style>

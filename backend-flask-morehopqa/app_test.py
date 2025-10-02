@@ -14,16 +14,16 @@ tasks = {}
 FIXED_RESULT = {
     "final_answer": "Esta é uma resposta de teste gerada pelo servidor mock. O processamento real não foi executado.",
     "nodes": {
-        "node1": {"name": "Nó de Teste 1", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
-        "node2": {"name": "Nó de Teste 2", "type" : "entity", "propX" : "abcd", "propY" : 123},
-        "node3": {"name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
-        "node4": {"name": "Nó de Teste 3", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
-        "node5": {"name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
-        "node6": {"name": "Nó de Teste 3", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
-        "node7": {"name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
-        "node8": {"name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
-        "node9": {"name": "Nó de Teste 3", "type" : "entity", "propX" : "abcd", "propY" : 123},
-        "node10": {"name": "Nó de Teste 3", "type" : "entity", "propX" : "abcd", "propY" : 123}
+        "node1": {"id": 1, "name": "Nó de Teste 1", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
+        "node2": {"id": 2, "name": "Nó de Teste 2", "type" : "entity", "propX" : "abcd", "propY" : 123},
+        "node3": {"id": 3, "name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
+        "node4": {"id": 4, "name": "Nó de Teste 3", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
+        "node5": {"id": 5, "name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
+        "node6": {"id": 6, "name": "Nó de Teste 3", "type" : "ontolgy", "propX" : "abcd", "propY" : 123},
+        "node7": {"id": 7, "name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
+        "node8": {"id": 8, "name": "Nó de Teste 3", "type" : "individual", "propX" : "abcd", "propY" : 123},
+        "node9": {"id": 9, "name": "Nó de Teste 3", "type" : "entity", "propX" : "abcd", "propY" : 123},
+        "node10": {"id": 10, "name": "Nó de Teste 3", "type" : "entity", "propX" : "abcd", "propY" : 123}
     },
     "edges": {
         "edge1": {"source": "node1", "target": "node2", "label": "link1"},

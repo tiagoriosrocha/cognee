@@ -15,6 +15,7 @@
         <v-row class="mb-4">
           <v-col cols="12">
             <h1 class="text-h4 font-weight-bold text-center">
+              <!-- <v-icon>fa-solid fa-chart-simple</v-icon>  -->
               Dashboard de Análise
             </h1>
           </v-col>
@@ -185,7 +186,7 @@
       {{ snackbarMessage }}
     </v-snackbar>
 
-    <v-footer app color="blue-grey-darken-4" dark>
+    <!-- <v-footer app color="blue-grey-darken-4" dark>
       <v-container>
         <v-row>
           <v-col class="text-center" cols="12">
@@ -193,7 +194,7 @@
           </v-col>
         </v-row>
       </v-container>
-    </v-footer>
+    </v-footer> -->
   </v-app>
 </template>
 

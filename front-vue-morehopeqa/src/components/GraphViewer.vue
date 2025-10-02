@@ -45,6 +45,7 @@ export default {
           }),
         },
         node: {
+          selectable: true,
           normal: {
             radius: 15,
             color: (node) => {
@@ -59,6 +60,21 @@ export default {
                   return "#cccccc"; // cinza padrão
               }
             },
+          },
+          selected: {
+            type: "circle",
+            radius: 16,
+            strokeWidth: 0,
+            strokeColor: "#000000",
+            strokeDasharray: "0",
+            color: "#4466cc",
+          },
+          focusring: {
+            visible: true,
+            width: 4,
+            padding: 3,
+            color: "#eebb00",
+            dasharray: "0",
           },
           label: {
             visible: true,
@@ -85,6 +101,11 @@ export default {
         "node:click": (nodeId) => {
           const nodeData = this.nodes[nodeId.node];
           console.log("Nodo clicado:", nodeData);
+          this.$emit("node-selected", nodeData);
+        },
+        "view:click": () => {
+          const nodeData = null;
+          console.log("view clicada:", nodeData);
           this.$emit("node-selected", nodeData);
         },
       };
