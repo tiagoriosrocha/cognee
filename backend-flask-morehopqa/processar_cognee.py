@@ -53,7 +53,8 @@ class ProcessarCognee:
 
         # Passo 4: Criar o grafo de conhecimento
         logger.info("Iniciando cognify...")
-        await cognee.cognify(ontology_file_path=ontology_path)
+        #await cognee.cognify(ontology_file_path=ontology_path)
+        await cognee.cognify()
 
         # Passo 5: Executando a consulta
         logger.info("Executando a busca no grafo...")
