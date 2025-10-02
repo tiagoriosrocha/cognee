@@ -45,7 +45,7 @@
   </v-row>
 
   <v-row v-if="processedAnswer">
-    <v-col cols="12" md="8">
+    <v-col cols="12" md="10">
       <v-card class="pa-4 min-h-600" outlined>
         <v-card-title class="text-h6 font-weight-medium">
           Grafo do Processamento Cognee
@@ -60,8 +60,8 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="4">
-      <v-card class="pa-4 min-h-600" outlined>
+    <v-col cols="12" md="2">
+      <v-card class="pa-4 fill-height" outlined>
         <v-card-title class="text-h6 font-weight-medium">
           Detalhes do Nodo
         </v-card-title>
@@ -91,38 +91,48 @@
   <v-row v-if="processedAnswer">
     <v-col cols="12">
       <v-card class="pa-4" outlined>
-        <v-card-title class="text-h6 font-weight-medium">
+        <v-card-title class="text-h6 font-weight-medium d-flex align-center">
           Detalhes das Propriedades do Grafo
+          <v-spacer></v-spacer>
+          <!-- Botão de minimizar -->
+          <v-btn icon @click="cardMinimized = !cardMinimized" size="small">
+            <v-icon>{{
+              cardMinimized ? "mdi-chevron-down" : "mdi-chevron-up"
+            }}</v-icon>
+          </v-btn>
         </v-card-title>
-        <v-card-text>
-          <v-table>
-            <thead>
-              <tr>
-                <th class="text-left">ID do Nó</th>
-                <th class="text-left">Nome do Nó</th>
-                <th class="text-left">Outras Propriedades</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(node, id) in graphData.nodes" :key="id">
-                <td>{{ id }}</td>
-                <td>{{ node.name }}</td>
-                <td>
-                  <div v-for="(value, key) in node" :key="key">
-                    <span v-if="key !== 'name'">
-                      <strong>{{ key }}:</strong>
-                      {{
-                        typeof value === "object"
-                          ? JSON.stringify(value)
-                          : value
-                      }}
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </v-table>
-        </v-card-text>
+
+        <v-expand-transition>
+          <v-card-text v-show="!cardMinimized">
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="text-left">ID do Nó</th>
+                  <th class="text-left">Nome do Nó</th>
+                  <th class="text-left">Outras Propriedades</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(node, id) in graphData.nodes" :key="id">
+                  <td>{{ id }}</td>
+                  <td>{{ node.name }}</td>
+                  <td>
+                    <div v-for="(value, key) in node" :key="key">
+                      <span v-if="key !== 'name'">
+                        <strong>{{ key }}:</strong>
+                        {{
+                          typeof value === "object"
+                            ? JSON.stringify(value)
+                            : value
+                        }}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-expand-transition>
       </v-card>
     </v-col>
   </v-row>
@@ -138,11 +148,11 @@
 
   <v-snackbar
     v-model="processingSnackbar"
-    :timeout="0"
     color="info"
     location="bottom"
+    :timeout="-1"
   >
-    Processando a requisição, por favor aguarde...
+    Processando a requisição, por favor aguarde... ({{ elapsed }}s)
     <v-progress-circular
       indeterminate
       color="white"
@@ -177,10 +187,14 @@ export default {
       selectedProcessingType: null,
       processing: false,
       processedAnswer: null,
+      cardMinimized: false,
       snackbar: false,
       snackbarMessage: "",
       snackbarColor: "",
       processingSnackbar: false,
+      elapsed: 0,
+      timer: null,
+      pollingInterval: null,
       graphData: {
         nodes: {},
         edges: {},
@@ -195,6 +209,50 @@ export default {
     }
   },
   methods: {
+    // async processar() {
+    //   if (!this.selectedItem || this.selectedProcessingType === null) {
+    //     this.showSnackbar(
+    //       "Por favor, selecione uma pergunta e um tipo de processamento.",
+    //       "error"
+    //     );
+    //     return;
+    //   }
+
+    //   //this.processing = true;
+    //   this.processingSnackbar = true;
+
+    //   const payload = {
+    //     selectedQuestion: this.selectedItem,
+    //     processingType: this.selectedProcessingType,
+    //   };
+
+    //   try {
+    //     const response = await fetch("http://localhost:5000/runquestion", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify(payload),
+    //     });
+
+    //     if (!response.ok) {
+    //       throw new Error(`Erro na requisição: ${response.statusText}`);
+    //     }
+
+    //     const data = await response.json();
+
+    //     this.processedAnswer = data.final_answer;
+    //     this.graphData.nodes = data.nodes;
+    //     this.graphData.edges = data.edges;
+
+    //     this.showSnackbar("Requisição concluída com sucesso!", "success");
+    //     console.log("Resposta da API:", data);
+    //   } catch (error) {
+    //     this.showSnackbar("Ocorreu um erro no processamento.", "error");
+    //     console.error("Erro na requisição:", error);
+    //   } finally {
+    //     // this.processing = false;
+    //     this.processingSnackbar = false;
+    //   }
+    // },
     async processar() {
       if (!this.selectedItem || this.selectedProcessingType === null) {
         this.showSnackbar(
@@ -204,8 +262,12 @@ export default {
         return;
       }
 
-      //this.processing = true;
-      this.processingSnackbar = true;
+      // Garante que não haja um polling antigo rodando
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+
+      this.showSnackbarProcessando();
 
       const payload = {
         selectedQuestion: this.selectedItem,
@@ -213,31 +275,91 @@ export default {
       };
 
       try {
+        // 1. FAZ A REQUISIÇÃO PARA INICIAR O PROCESSO
         const response = await fetch("http://localhost:5000/runquestion", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
 
-        if (!response.ok) {
-          throw new Error(`Erro na requisição: ${response.statusText}`);
+        // O backend deve responder com 202 (Accepted)
+        if (response.status !== 202) {
+          const errorData = await response.json();
+          throw new Error(
+            `Erro ao iniciar a tarefa: ${errorData.erro || response.statusText}`
+          );
         }
 
-        const data = await response.json();
+        const { task_id } = await response.json();
 
-        this.processedAnswer = data.final_answer;
-        this.graphData.nodes = data.nodes;
-        this.graphData.edges = data.edges;
-
-        this.showSnackbar("Requisição concluída com sucesso!", "success");
-        console.log("Resposta da API:", data);
+        // 2. INICIA O POLLING PARA VERIFICAR O STATUS
+        this.iniciarPolling(task_id);
       } catch (error) {
-        this.showSnackbar("Ocorreu um erro no processamento.", "error");
-        console.error("Erro na requisição:", error);
-      } finally {
-        // this.processing = false;
-        this.processingSnackbar = false;
+        this.showSnackbar(
+          "Ocorreu um erro ao iniciar o processamento.",
+          "error"
+        );
+        console.error("Erro na requisição inicial:", error);
+        this.hideSnackbarProcessando();
       }
+    },
+
+    // NOVO MÉTODO PARA CONTROLAR O POLLING
+    iniciarPolling(taskId) {
+      // Verifica o status a cada 2 segundos (2000 ms).
+      this.pollingInterval = setInterval(async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/status/${taskId}`
+          );
+
+          if (!response.ok) {
+            // Se houver um erro de rede ou 500 no endpoint de status, para o polling.
+            throw new Error(`Erro ao verificar status: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          // 3. VERIFICA O STATUS RETORNADO PELA API
+          if (data.status === "SUCCESS") {
+            this.finalizarPollingComSucesso(data.result);
+          } else if (data.status === "FAILURE") {
+            this.finalizarPollingComErro(data.result);
+          }
+          // Se for 'PENDING' ou 'PROCESSING', não faz nada e continua o loop.
+        } catch (error) {
+          // Se a verificação de status falhar (ex: rede caiu), para tudo.
+          this.finalizarPollingComErro({ detalhes: error.message });
+        }
+      }, 5000);
+    },
+
+    // NOVO MÉTODO PARA QUANDO O POLLING TERMINA COM SUCESSO
+    finalizarPollingComSucesso(resultado) {
+      clearInterval(this.pollingInterval); // Para de verificar
+      this.pollingInterval = null;
+
+      // Atualiza os dados da sua aplicação com o resultado
+      this.processedAnswer = resultado.final_answer;
+      this.graphData.nodes = resultado.nodes;
+      this.graphData.edges = resultado.edges;
+
+      this.hideSnackbarProcessando();
+      this.showSnackbar("Processamento concluído com sucesso!", "success");
+      console.log("Resposta final da API:", resultado);
+    },
+
+    // NOVO MÉTODO PARA QUANDO O POLLING TERMINA COM ERRO
+    finalizarPollingComErro(erro) {
+      clearInterval(this.pollingInterval); // Para de verificar
+      this.pollingInterval = null;
+
+      this.hideSnackbarProcessando();
+      this.showSnackbar(
+        "Ocorreu um erro no processamento do servidor.",
+        "error"
+      );
+      console.error("Erro retornado pelo backend:", erro.detalhes);
     },
     onNodeSelected(node) {
       console.log("Nodo clicado:", node);
@@ -248,6 +370,24 @@ export default {
       this.snackbarColor = color;
       this.snackbar = true;
     },
+    showSnackbarProcessando() {
+      this.processingSnackbar = true;
+      this.elapsed = 0;
+
+      this.timer = setInterval(() => {
+        this.elapsed++;
+      }, 1000);
+      console.log("mostrar processando");
+    },
+    hideSnackbarProcessando() {
+      this.processingSnackbar = false;
+      clearInterval(this.timer);
+      this.timer = null;
+      console.log("esconder processando");
+    },
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
 };
 </script>

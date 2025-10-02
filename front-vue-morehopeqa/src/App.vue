@@ -147,13 +147,27 @@
 
         <v-divider class="my-6"></v-divider>
 
-        <v-row>
-          <v-col cols="12" md="6">
+        <!-- <v-row>
+          <v-col cols="12" md="12">
             <ProcessingDashboard
               :selectedItem="selectedItem"
             ></ProcessingDashboard>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="12">
+            <ProcessingDashboard
+              :selectedItem="selectedItem"
+            ></ProcessingDashboard>
+          </v-col>
+        </v-row> -->
+
+        <v-row>
+          <v-col cols="6" md="6">
+            <ProcessingDashboard
+              :selectedItem="selectedItem"
+            ></ProcessingDashboard>
+          </v-col>
+
+          <v-col cols="6" md="6">
             <ProcessingDashboard
               :selectedItem="selectedItem"
             ></ProcessingDashboard>
