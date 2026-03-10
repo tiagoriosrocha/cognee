@@ -1,5 +1,5 @@
 from typing import Type
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from openai import AzureOpenAI, AsyncAzureOpenAI
 
 from cognee.infrastructure.llm.structured_output_framework.litellm_instructor.llm.llm_interface import (
@@ -8,8 +8,8 @@ from cognee.infrastructure.llm.structured_output_framework.litellm_instructor.ll
 from cognee.shared.rate_limiting import llm_rate_limiter_context_manager
 from cognee.modules.observability.get_observe import get_observe
 
-# Inicializa o decorador de observabilidade para monitorar as gerações do LLM
 observe = get_observe()
+
 
 class AzureOpenAIAdapter(LLMInterface):
     name = "AzureOpenAI"
@@ -22,27 +22,227 @@ class AzureOpenAIAdapter(LLMInterface):
         model: str,
         max_completion_tokens: int,
     ):
-        # Armazena as configurações básicas do modelo e limite de tokens
         self.model = model
         self.max_completion_tokens = max_completion_tokens
 
-        # Inicializa o cliente síncrono da Azure OpenAI
         self.client = AzureOpenAI(
             api_key=api_key,
-            base_url=endpoint, # URL do recurso Azure
+            base_url=endpoint,
             api_version=api_version,
         )
 
-        # Inicializa o cliente assíncrono da Azure OpenAI (usado em pipelines de alta performance)
         self.aclient = AsyncAzureOpenAI(
             api_key=api_key,
             base_url=endpoint,
             api_version=api_version,
         )
 
-    # -------------------------------
-    # ASYNC (Método Assíncrono)
-    # -------------------------------
+    # ------------------------------------------------
+    # REPAIR PROMPT BUILDERS
+    # ------------------------------------------------
+
+    def _build_repair_prompt(self, previous_output: str, validation_error: str) -> str:
+        return f"""
+    The previous JSON output failed validation against the required Pydantic schema.
+
+    Validation error:
+    {validation_error}
+
+    Previous invalid JSON:
+    {previous_output}
+
+    You must fix the JSON so it strictly matches the required schema.
+
+    REQUIRED JSON STRUCTURE
+
+    {{
+    "nodes": [
+        {{
+        "id": "uuid-v4-string",
+        "name": "string",
+        "type": "string",
+        "description": "string"
+        }}
+    ],
+    "edges": [
+        {{
+        "source_node_id": "uuid-v4-string",
+        "target_node_id": "uuid-v4-string",
+        "relationship_name": "string"
+        }}
+    ]
+    }}
+
+    FIELD RULES
+
+    Nodes MUST contain:
+    - id
+    - name
+    - type
+    - description
+
+    Edges MUST contain:
+    - source_node_id
+    - target_node_id
+    - relationship_name
+
+    UUID RULES
+
+    All node IDs must be valid UUID v4 strings.
+
+    Format:
+    xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+
+    Rules:
+    - lowercase only
+    - hexadecimal characters only (0-9, a-f)
+    - 36 characters total
+
+    VALID EXAMPLE
+
+    {{
+    "nodes": [
+        {{
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "name": "Townsend Coleman",
+        "type": "Person",
+        "description": "American voice actor known for animated television roles."
+        }},
+        {{
+        "id": "1f0d2b3a-0c45-4f34-9a62-b0f6c9d6e2f1",
+        "name": "United States",
+        "type": "Country",
+        "description": "Country of nationality."
+        }}
+    ],
+    "edges": [
+        {{
+        "source_node_id": "550e8400-e29b-41d4-a716-446655440000",
+        "target_node_id": "1f0d2b3a-0c45-4f34-9a62-b0f6c9d6e2f1",
+        "relationship_name": "has_nationality"
+        }}
+    ]
+    }}
+
+    REPAIR INSTRUCTIONS
+
+    - Do not remove valid information
+    - Only repair invalid or missing fields
+    - Ensure the final output is valid JSON
+    - Ensure all required fields exist
+    - Ensure UUID format is correct
+    - Preserve the original meaning of the graph
+
+    Return ONLY the corrected JSON.
+    """
+
+    # ------------------------------------------------
+    # REPAIR FUNCTIONS
+    # ------------------------------------------------
+
+    async def _repair_structured_output_async(
+        self,
+        system_prompt: str,
+        previous_output: str,
+        validation_error: str,
+    ) -> str:
+
+        repair_prompt = self._build_repair_prompt(previous_output, validation_error)
+
+        async with llm_rate_limiter_context_manager():
+            resp = await self.aclient.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": repair_prompt},
+                ],
+                max_completion_tokens=self.max_completion_tokens,
+            )
+
+        return resp.choices[0].message.content
+
+    def _repair_structured_output_sync(
+        self,
+        system_prompt: str,
+        previous_output: str,
+        validation_error: str,
+    ) -> str:
+
+        repair_prompt = self._build_repair_prompt(previous_output, validation_error)
+
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": repair_prompt},
+            ],
+            max_tokens=self.max_completion_tokens,
+        )
+
+        return resp.choices[0].message.content
+
+    # ------------------------------------------------
+    # SAFE VALIDATION
+    # ------------------------------------------------
+
+    async def _safe_validate_async(
+        self,
+        content: str,
+        response_model: Type[BaseModel],
+        system_prompt: str,
+        max_retries: int = 2,
+    ) -> BaseModel:
+
+        for attempt in range(max_retries + 1):
+
+            try:
+                return response_model.model_validate_json(content)
+
+            except ValidationError as e:
+
+                if attempt >= max_retries:
+                    raise
+
+                print("⚠ Structured output validation failed. Attempting repair...")
+                print(e)
+
+                content = await self._repair_structured_output_async(
+                    system_prompt,
+                    content,
+                    str(e),
+                )
+
+    def _safe_validate_sync(
+        self,
+        content: str,
+        response_model: Type[BaseModel],
+        system_prompt: str,
+        max_retries: int = 2,
+    ) -> BaseModel:
+
+        for attempt in range(max_retries + 1):
+
+            try:
+                return response_model.model_validate_json(content)
+
+            except ValidationError as e:
+
+                if attempt >= max_retries:
+                    raise
+
+                print("⚠ Structured output validation failed. Attempting repair...")
+                print(e)
+
+                content = self._repair_structured_output_sync( #gera novamente o content corrigido...
+                    system_prompt,
+                    content,
+                    str(e),
+                )
+
+    # ------------------------------------------------
+    # ASYNC GENERATION
+    # ------------------------------------------------
+
     @observe(as_type="generation")
     async def acreate_structured_output(
         self,
@@ -51,74 +251,32 @@ class AzureOpenAIAdapter(LLMInterface):
         response_model: Type[BaseModel],
         **kwargs,
     ) -> BaseModel:
-        """
-        Gera uma saída estruturada de forma assíncrona.
-        Se o modelo esperado for uma string, retorna texto puro.
-        Caso contrário, força o LLM a seguir um esquema JSON específico.
-        """
 
-        # Caso especial: Se o Cognee pedir apenas uma string (ex: teste de conexão ou resumo simples)
-        if response_model is str:
-            async with llm_rate_limiter_context_manager():
-                resp = await self.aclient.chat.completions.create(
-                    model=self.model,
-                    messages=[
-                        {"role": "user", "content": text_input},
-                        {"role": "system", "content": system_prompt},
-                    ],
-                    max_completion_tokens=self.max_completion_tokens,
-                    **kwargs,
-                )
-            return resp.choices[0].message.content
-
-        # Fluxo Principal: Saída Estruturada (Pydantic)
-        system_prompt = f"""
-        {system_prompt}
-        IMPORTANT:
-        You must generate IDs strictly as valid UUID v4 strings.
-
-        UUID format:
-        - 36 characters
-        - Lowercase
-        - Only hexadecimal characters (0-9, a-f)
-        - Pattern: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-        - Example: 550e8400-e29b-41d4-a716-446655440000
-
-        Do NOT generate custom IDs like 'rule-01' or 'ruleset-123'.
-        Only valid UUID strings are allowed.
-        """
-        
         async with llm_rate_limiter_context_manager():
             resp = await self.aclient.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "user", "content": text_input},
                     {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": text_input},
                 ],
-                # Define o formato da resposta usando JSON Schema baseado no modelo Pydantic
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": response_model.__name__, # Nome da classe (ex: KnowledgeGraph)
-                        "schema": response_model.model_json_schema(), # Gera o esquema JSON esperado
-                    },
-                },
                 max_completion_tokens=self.max_completion_tokens,
-                **kwargs,
             )
 
-        # Extrai o conteúdo da resposta do assistente
         content = resp.choices[0].message.content
 
-        # Debug: Imprime no console o que a Azure retornou antes de tentar validar
-        print(f"Content recebido do Azure OpenAI  (assíncrono): {content}")
+        if response_model is str:
+            return content
 
-        # Converte a string JSON recebida de volta em um objeto Pydantic validado
-        return response_model.model_validate_json(content)
+        return await self._safe_validate_async(
+            content,
+            response_model,
+            system_prompt,
+        )
 
-    # -------------------------------
-    # SYNC (Método Síncrono)
-    # -------------------------------
+    # ------------------------------------------------
+    # SYNC GENERATION
+    # ------------------------------------------------
+
     def create_structured_output(
         self,
         text_input: str,
@@ -126,45 +284,23 @@ class AzureOpenAIAdapter(LLMInterface):
         response_model: Type[BaseModel],
         **kwargs,
     ) -> BaseModel:
-        """
-        Versão síncrona do método acima. Utilizada em partes do código
-        que não suportam await/async.
-        """
-
-        # Lógica idêntica ao assíncrono, mas usando o cliente síncrono (self.client)
-        if response_model is str:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "user", "content": text_input},
-                    {"role": "system", "content": system_prompt},
-                ],
-                max_completion_tokens=self.max_completion_tokens,
-                **kwargs,
-            )
-            return resp.choices[0].message.content
 
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "user", "content": text_input},
                 {"role": "system", "content": system_prompt},
+                {"role": "user", "content": text_input},
             ],
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": response_model.__name__,
-                    "schema": response_model.model_json_schema(),
-                },
-            },
-            max_completion_tokens=self.max_completion_tokens,
-            **kwargs,
+            max_tokens=self.max_completion_tokens,
         )
 
         content = resp.choices[0].message.content
 
-        # Debug: Imprime no console o que a Azure retornou antes de tentar validar
-        print(f"Content recebido do Azure OpenAI (síncrono): {content}")
+        if response_model is str:
+            return content
 
-        # Validação final do JSON contra o modelo Pydantic
-        return response_model.model_validate_json(content)
+        return self._safe_validate_sync(
+            content,
+            response_model,
+            system_prompt,
+        )
