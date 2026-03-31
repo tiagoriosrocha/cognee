@@ -1,10 +1,14 @@
 from cognee.modules.ontology.base_ontology_resolver import BaseOntologyResolver
-from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import RDFLibOntologyResolver
-from cognee.modules.ontology.matching_strategies import FuzzyMatchingStrategy
+from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import RDFLibOntologyResolver, EnhancedOntologyResolver
+from cognee.modules.ontology.matching_strategies import FuzzyMatchingStrategy, SemanticMatchingStrategy
 
 
 def get_default_ontology_resolver() -> BaseOntologyResolver:
-    return RDFLibOntologyResolver(ontology_file=None, matching_strategy=FuzzyMatchingStrategy())
+    #Código original
+    #return RDFLibOntologyResolver(ontology_file=None, matching_strategy=FuzzyMatchingStrategy())
+
+    #Código alterado
+    return EnhancedOntologyResolver(ontology_file=None, matching_strategy=SemanticMatchingStrategy())
 
 
 def get_ontology_resolver_from_env(
@@ -37,8 +41,14 @@ def get_ontology_resolver_from_env(
         else:
             file_paths = ontology_file_path
 
-        return RDFLibOntologyResolver(
-            matching_strategy=FuzzyMatchingStrategy(), ontology_file=file_paths
+        #Código original
+        #return RDFLibOntologyResolver( 
+        #    matching_strategy=FuzzyMatchingStrategy(), ontology_file=file_paths
+        #)
+
+        #Código alterado
+        return EnhancedOntologyResolver(
+            matching_strategy=SemanticMatchingStrategy(), ontology_file=file_paths
         )
     else:
         raise EnvironmentError(

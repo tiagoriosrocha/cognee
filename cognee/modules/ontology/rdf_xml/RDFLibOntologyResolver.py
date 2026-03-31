@@ -3,7 +3,7 @@ import difflib
 from cognee.shared.logging_utils import get_logger
 from collections import deque
 from typing import List, Tuple, Dict, Optional, Any, Union, IO
-from rdflib import Graph, URIRef, RDF, RDFS, OWL
+from rdflib import Graph, URIRef, RDF, RDFS, OWL, SKOS
 
 from cognee.modules.ontology.exceptions import (
     OntologyInitializationError,
@@ -255,3 +255,43 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
         except Exception as e:
             logger.error("Error in get_subgraph: %s", str(e))
             raise GetSubgraphError() from e
+
+
+
+class EnhancedOntologyResolver(RDFLibOntologyResolver):
+    """Resolver customizado que extrai rdfs:label para melhorar o match de entidades."""
+    
+    def __init__(
+        self,
+        ontology_file: Optional[Union[str, List[str], IO, List[IO]]] = None,
+        matching_strategy: Optional[MatchingStrategy] = None,
+    ) -> None:
+        # Importa a estratégia customizada para evitar dependência circular
+        from cognee.modules.ontology.matching_strategies import SemanticMatchingStrategy
+        
+        # Se não passarem uma estratégia, usa a nossa Semantic
+        strategy = matching_strategy or SemanticMatchingStrategy()
+        super().__init__(ontology_file=ontology_file, matching_strategy=strategy)
+
+    def build_lookup(self) -> None:
+        super().build_lookup()
+        
+        if not getattr(self, "graph", None):
+            return
+            
+        # Lista com as propriedades que queremos extrair como chaves de busca
+        propriedades_de_texto = [RDFS.label, SKOS.altLabel]
+        
+        # Para cada propriedade (label e altLabel), varremos a ontologia
+        for propriedade in propriedades_de_texto:
+            for subj, obj in self.graph.subject_objects(propriedade):
+                label_str = str(obj).lower()
+                
+                # Associa a string encontrada à URI correspondente
+                if subj in self.lookup.get("classes", {}).values():
+                    self.lookup["classes"][label_str] = subj
+                    
+                elif subj in self.lookup.get("individuals", {}).values():
+                    self.lookup["individuals"][label_str] = subj
+                    
+        logger.info("Enhanced lookup applied: rdfs:labels and skos:altLabels added to index.")
