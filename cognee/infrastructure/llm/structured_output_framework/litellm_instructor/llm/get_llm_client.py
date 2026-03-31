@@ -35,6 +35,7 @@ class LLMProvider(Enum):
     MISTRAL = "mistral"
     BEDROCK = "bedrock"
     LLAMA_CPP = "llama_cpp"
+    AZURE_OPENAI = "azure_openai"
 
 
 def get_llm_client(raise_api_key_error: bool = True):
@@ -91,6 +92,17 @@ def get_llm_client(raise_api_key_error: bool = True):
             fallback_model=llm_config.fallback_model,
         )
 
+    elif provider == LLMProvider.AZURE_OPENAI:
+        from cognee.infrastructure.llm.structured_output_framework.litellm_instructor.llm.azure_openai.adapter import AzureOpenAIAdapter
+
+        return AzureOpenAIAdapter(
+            api_key=llm_config.llm_api_key,
+            endpoint=llm_config.llm_endpoint,
+            api_version=llm_config.llm_api_version,
+            model=llm_config.llm_model,
+            max_completion_tokens=max_completion_tokens,
+        )
+    
     elif provider == LLMProvider.OLLAMA:
         if llm_config.llm_api_key is None and raise_api_key_error:
             raise LLMAPIKeyNotSetError()

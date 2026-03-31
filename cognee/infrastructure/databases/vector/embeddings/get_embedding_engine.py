@@ -100,6 +100,18 @@ def create_embedding_engine(
             huggingface_tokenizer=huggingface_tokenizer,
             batch_size=embedding_batch_size,
         )
+    
+    if embedding_provider == "azure_openai":
+        from .AzureOpenAIEmbeddingEngine import AzureOpenAIEmbeddingEngine
+
+        return AzureOpenAIEmbeddingEngine(
+            model=embedding_model,
+            dimensions=embedding_dimensions,
+            api_key=embedding_api_key or llm_api_key,
+            endpoint=embedding_endpoint,
+            api_version=embedding_api_version,
+            batch_size=embedding_batch_size,
+        )
 
     from .LiteLLMEmbeddingEngine import LiteLLMEmbeddingEngine
 
