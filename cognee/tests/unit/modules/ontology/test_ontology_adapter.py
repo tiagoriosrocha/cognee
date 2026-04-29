@@ -1,6 +1,12 @@
 import pytest
-from rdflib import Graph, Namespace, RDF, OWL, RDFS
-from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import RDFLibOntologyResolver
+import numpy
+from rdflib import Graph, Namespace, RDF, OWL, RDFS, Literal
+from rdflib.namespace import SKOS
+from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import (
+    RDFLibOntologyResolver,
+    EnhancedOntologyResolver,
+    EmbeddingEnhancedOntologyResolver,
+)
 from cognee.modules.ontology.models import AttachedOntologyNode
 from cognee.modules.ontology.get_default_ontology_resolver import get_default_ontology_resolver
 
@@ -219,6 +225,16 @@ def test_fuzzy_matching_strategy_empty_candidates():
     assert result is None
 
 
+def test_semantic_matching_strategy_normalizes_candidates():
+    """Test SemanticMatchingStrategy normalizes accents and separators consistently."""
+    from cognee.modules.ontology.matching_strategies import SemanticMatchingStrategy
+
+    strategy = SemanticMatchingStrategy()
+
+    result = strategy.find_match("Sao_Paulo", ["são paulo", "rio_de_janeiro"])
+    assert result == "são paulo"
+
+
 def test_base_ontology_resolver_initialization():
     """Test BaseOntologyResolver initialization with default matching strategy."""
     from cognee.modules.ontology.base_ontology_resolver import BaseOntologyResolver
@@ -301,6 +317,7 @@ def test_get_default_ontology_resolver():
     resolver = get_default_ontology_resolver()
 
     assert isinstance(resolver, RDFLibOntologyResolver)
+    assert isinstance(resolver, EmbeddingEnhancedOntologyResolver)
     assert isinstance(resolver.matching_strategy, FuzzyMatchingStrategy)
 
 
@@ -360,7 +377,9 @@ def test_get_ontology_resolver_from_env_unsupported_resolver():
         )
 
     assert "Unsupported ontology resolver: unsupported" in str(exc_info.value)
-    assert "Supported resolvers are: RdfLib with FuzzyMatchingStrategy" in str(exc_info.value)
+    assert "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching." in str(
+        exc_info.value
+    )
 
 
 def test_get_ontology_resolver_from_env_unsupported_strategy():
@@ -467,6 +486,22 @@ def test_get_ontology_resolver_from_env_with_actual_file():
     )
 
     assert isinstance(resolver, RDFLibOntologyResolver)
+    assert isinstance(resolver.matching_strategy, FuzzyMatchingStrategy)
+    assert resolver.ontology_file == "/path/to/ontology.owl"
+
+
+def test_get_ontology_resolver_from_env_hybrid():
+    """Test get_ontology_resolver_from_env supports the hybrid resolver."""
+    from cognee.modules.ontology.get_default_ontology_resolver import get_ontology_resolver_from_env
+    from cognee.modules.ontology.matching_strategies import FuzzyMatchingStrategy
+
+    resolver = get_ontology_resolver_from_env(
+        ontology_resolver="rdflib",
+        matching_strategy="hybrid",
+        ontology_file_path="/path/to/ontology.owl",
+    )
+
+    assert isinstance(resolver, EmbeddingEnhancedOntologyResolver)
     assert isinstance(resolver.matching_strategy, FuzzyMatchingStrategy)
     assert resolver.ontology_file == "/path/to/ontology.owl"
 
@@ -640,3 +675,72 @@ def test_multifile_ontology_with_overlapping_entities():
 
         os.unlink(file1_path)
         os.unlink(file2_path)
+
+
+def test_enhanced_ontology_resolver_matches_label_and_alt_label():
+    """Test label and altLabel are added to the textual lookup with normalized keys."""
+    ns = Namespace("http://example.org/test#")
+    g = Graph()
+
+    g.add((ns.Car, RDF.type, OWL.Class))
+    g.add((ns.Car, RDFS.label, Literal("Automóvel")))
+    g.add((ns.Car, SKOS.altLabel, Literal("Carro")))
+
+    resolver = EnhancedOntologyResolver()
+    resolver.graph = g
+    resolver.build_lookup()
+
+    assert resolver.find_closest_match("Automovel", "classes") == "automovel"
+    assert resolver.find_closest_match("carro", "classes") == "carro"
+
+
+def test_embedding_enhanced_ontology_resolver_falls_back_to_embedding(monkeypatch):
+    """Test embedding fallback returns the ontology node when similarity reaches the threshold."""
+    ns = Namespace("http://example.org/test#")
+    g = Graph()
+
+    g.add((ns.Manufacturer, RDF.type, OWL.Class))
+    g.add((ns.Manufacturer, RDFS.label, Literal("Fabricante de Veículos")))
+    g.add((ns.Manufacturer, SKOS.altLabel, Literal("Montadora")))
+
+    resolver = EmbeddingEnhancedOntologyResolver()
+    resolver.graph = g
+    resolver.build_lookup()
+
+    embeddings = {
+        "Fabricante de Veículos ; Montadora": numpy.array([1.0, 0.0]),
+        "vehicle maker": numpy.array([1.0, 0.0]),
+    }
+    monkeypatch.setattr(
+        resolver,
+        "_encode_texts",
+        lambda texts: numpy.vstack([embeddings[text] for text in texts]),
+    )
+
+    assert resolver.find_closest_match("vehicle maker", "classes") == "manufacturer"
+
+
+def test_embedding_enhanced_ontology_resolver_respects_threshold(monkeypatch):
+    """Test embedding fallback refuses matches below the similarity threshold."""
+    ns = Namespace("http://example.org/test#")
+    g = Graph()
+
+    g.add((ns.Manufacturer, RDF.type, OWL.Class))
+    g.add((ns.Manufacturer, RDFS.label, Literal("Fabricante de Veículos")))
+    g.add((ns.Manufacturer, SKOS.altLabel, Literal("Montadora")))
+
+    resolver = EmbeddingEnhancedOntologyResolver()
+    resolver.graph = g
+    resolver.build_lookup()
+
+    embeddings = {
+        "Fabricante de Veículos ; Montadora": numpy.array([1.0, 0.0]),
+        "vehicle maker": numpy.array([0.89, 0.0]),
+    }
+    monkeypatch.setattr(
+        resolver,
+        "_encode_texts",
+        lambda texts: numpy.vstack([embeddings[text] for text in texts]),
+    )
+
+    assert resolver.find_closest_match("vehicle maker", "classes") is None

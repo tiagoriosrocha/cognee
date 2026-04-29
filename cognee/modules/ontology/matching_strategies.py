@@ -1,7 +1,26 @@
-import unicodedata
 import difflib
+import re
+import unicodedata
 from abc import ABC, abstractmethod
 from typing import List, Optional
+
+
+def normalize_matching_text(text: str) -> str:
+    """Normalize text for resilient ontology matching."""
+    if not text:
+        return ""
+
+    nfkd_form = unicodedata.normalize("NFKD", text)
+    clean_text = "".join(char for char in nfkd_form if not unicodedata.combining(char))
+    clean_text = clean_text.casefold().replace("_", " ")
+    clean_text = re.sub(r"[^\w\s-]", " ", clean_text)
+    clean_text = re.sub(r"[-\s]+", " ", clean_text)
+    return clean_text.strip()
+
+
+def normalize_lookup_key(text: str) -> str:
+    """Normalize text for ontology lookup dictionary keys."""
+    return normalize_matching_text(text).replace(" ", "_")
 
 
 class MatchingStrategy(ABC):
@@ -61,10 +80,7 @@ class SemanticMatchingStrategy(MatchingStrategy):
         self.cutoff = cutoff
 
     def _normalize(self, text: str) -> str:
-        # Remove acentos e converte para lowercase
-        nfkd_form = unicodedata.normalize('NFKD', text)
-        clean_text = "".join([c for c in nfkd_form if not unicodedata.combining(c)])
-        return clean_text.replace("_", " ").lower().strip()
+        return normalize_matching_text(text)
 
     def find_match(self, name: str, candidates: List[str]) -> Optional[str]:
         if not candidates:
@@ -72,7 +88,11 @@ class SemanticMatchingStrategy(MatchingStrategy):
 
         name_clean = self._normalize(name)
         # Mapeia os candidatos limpos para os originais
-        clean_candidates = {self._normalize(c): c for c in candidates}
+        clean_candidates = {
+            normalized_candidate: candidate
+            for candidate in candidates
+            if (normalized_candidate := self._normalize(candidate))
+        }
 
         # Match exato primeiro
         if name_clean in clean_candidates:
@@ -81,9 +101,9 @@ class SemanticMatchingStrategy(MatchingStrategy):
         # Fuzzy match
         best_match = difflib.get_close_matches(
             name_clean,
-            clean_candidates.keys(),
+            list(clean_candidates.keys()),
             n=1,
-            cutoff=self.cutoff
+            cutoff=self.cutoff,
         )
 
-        return clean_candidates[best_match] if best_match else None
+        return clean_candidates[best_match[0]] if best_match else None

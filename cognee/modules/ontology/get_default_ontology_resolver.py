@@ -1,14 +1,19 @@
 from cognee.modules.ontology.base_ontology_resolver import BaseOntologyResolver
-from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import RDFLibOntologyResolver, EnhancedOntologyResolver
-from cognee.modules.ontology.matching_strategies import FuzzyMatchingStrategy, SemanticMatchingStrategy
+from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import (
+    RDFLibOntologyResolver,
+    EnhancedOntologyResolver,
+    EmbeddingEnhancedOntologyResolver,
+)
+from cognee.modules.ontology.matching_strategies import (
+    FuzzyMatchingStrategy,
+    SemanticMatchingStrategy,
+)
 
 
 def get_default_ontology_resolver() -> BaseOntologyResolver:
-    #Código original
-    #return RDFLibOntologyResolver(ontology_file=None, matching_strategy=FuzzyMatchingStrategy())
-
-    #Código alterado
-    return EnhancedOntologyResolver(ontology_file=None, matching_strategy=SemanticMatchingStrategy())
+    return EmbeddingEnhancedOntologyResolver(
+        ontology_file=None, matching_strategy=FuzzyMatchingStrategy()
+    )
 
 
 def get_ontology_resolver_from_env(
@@ -17,14 +22,16 @@ def get_ontology_resolver_from_env(
     """
     Create and return an ontology resolver instance based on environment parameters.
 
-    Currently, this function supports only the RDFLib-based ontology resolver
-    with a fuzzy matching strategy.
+    This factory supports RDFLib resolvers with three matching modes:
+    - fuzzy: URI/local-name lookup with fuzzy text matching
+    - semantic: label/altLabel-aware text lookup
+    - hybrid: label/altLabel-aware text lookup plus embedding fallback
 
     Args:
         ontology_resolver (str): The ontology resolver type to use.
             Supported value: "rdflib".
         matching_strategy (str): The matching strategy to apply.
-            Supported value: "fuzzy".
+            Supported values: "fuzzy", "semantic", "hybrid", "embedding".
         ontology_file_path (str): Path to the ontology file(s) required for the resolver.
             Can be a single path or comma-separated paths for multiple files.
 
@@ -35,23 +42,33 @@ def get_ontology_resolver_from_env(
         EnvironmentError: If the provided resolver or strategy is unsupported,
             or if required parameters are missing.
     """
-    if ontology_resolver == "rdflib" and matching_strategy == "fuzzy" and ontology_file_path:
-        if "," in ontology_file_path:
-            file_paths = [path.strip() for path in ontology_file_path.split(",")]
-        else:
-            file_paths = ontology_file_path
+    if ontology_resolver != "rdflib" or not ontology_file_path:
+        raise EnvironmentError(
+            f"Unsupported ontology resolver: {ontology_resolver}. "
+            "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching."
+        )
 
-        #Código original
-        #return RDFLibOntologyResolver( 
-        #    matching_strategy=FuzzyMatchingStrategy(), ontology_file=file_paths
-        #)
+    if "," in ontology_file_path:
+        file_paths = [path.strip() for path in ontology_file_path.split(",")]
+    else:
+        file_paths = ontology_file_path
 
-        #Código alterado
+    if matching_strategy == "fuzzy":
+        return RDFLibOntologyResolver(
+            matching_strategy=FuzzyMatchingStrategy(), ontology_file=file_paths
+        )
+
+    if matching_strategy == "labeld":
         return EnhancedOntologyResolver(
             matching_strategy=SemanticMatchingStrategy(), ontology_file=file_paths
         )
-    else:
-        raise EnvironmentError(
-            f"Unsupported ontology resolver: {ontology_resolver}. "
-            f"Supported resolvers are: RdfLib with FuzzyMatchingStrategy."
+
+    if matching_strategy in {"embedding"}:
+        return EmbeddingEnhancedOntologyResolver(
+            matching_strategy=FuzzyMatchingStrategy(), ontology_file=file_paths
         )
+
+    raise EnvironmentError(
+        f"Unsupported ontology resolver: {ontology_resolver}. "
+        "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching."
+    )

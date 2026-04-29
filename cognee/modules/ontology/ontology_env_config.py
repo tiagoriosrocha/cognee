@@ -20,7 +20,7 @@ class OntologyEnvConfig(BaseSettings):
     """
 
     ontology_resolver: str = "rdflib"
-    matching_strategy: str = "fuzzy"
+    matching_strategy: str = "embedding"
     ontology_file_path: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="allow", populate_by_name=True)

@@ -136,14 +136,16 @@ def get_cognify_router() -> APIRouter:
 
                 from cognee.modules.ontology.ontology_config import Config
                 from cognee.modules.ontology.rdf_xml.RDFLibOntologyResolver import (
-                    RDFLibOntologyResolver,
+                    EmbeddingEnhancedOntologyResolver,
                 )
                 from io import StringIO
 
                 ontology_streams = [StringIO(content) for content in ontology_contents]
                 config_to_use: Config = {
                     "ontology_config": {
-                        "ontology_resolver": RDFLibOntologyResolver(ontology_file=ontology_streams)
+                        "ontology_resolver": EmbeddingEnhancedOntologyResolver(
+                            ontology_file=ontology_streams
+                        )
                     }
                 }
 

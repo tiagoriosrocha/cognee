@@ -1,10 +1,11 @@
 import os
-import difflib
-from cognee.shared.logging_utils import get_logger
+from dataclasses import dataclass
 from collections import deque
 from typing import List, Tuple, Dict, Optional, Any, Union, IO
+import numpy
 from rdflib import Graph, URIRef, RDF, RDFS, OWL, SKOS
 
+from cognee.shared.logging_utils import get_logger
 from cognee.modules.ontology.exceptions import (
     OntologyInitializationError,
     FindClosestMatchError,
@@ -12,9 +13,19 @@ from cognee.modules.ontology.exceptions import (
 )
 from cognee.modules.ontology.base_ontology_resolver import BaseOntologyResolver
 from cognee.modules.ontology.models import AttachedOntologyNode
-from cognee.modules.ontology.matching_strategies import MatchingStrategy, FuzzyMatchingStrategy
+from cognee.modules.ontology.matching_strategies import (
+    MatchingStrategy,
+    FuzzyMatchingStrategy,
+    normalize_lookup_key,
+)
 
 logger = get_logger("OntologyAdapter")
+
+
+@dataclass(frozen=True)
+class OntologyEmbeddingCandidate:
+    key: str
+    text: str
 
 
 class RDFLibOntologyResolver(BaseOntologyResolver):
@@ -113,7 +124,10 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
             name = uri_str.split("#")[-1]
         else:
             name = uri_str.rstrip("/").split("/")[-1]
-        return name.lower().replace(" ", "_").strip()
+        return self._normalize_lookup_key(name)
+
+    def _normalize_lookup_key(self, value: str) -> str:
+        return normalize_lookup_key(value)
 
     def build_lookup(self) -> None:
         try:
@@ -158,7 +172,7 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
 
     def find_closest_match(self, name: str, category: str) -> Optional[str]:
         try:
-            normalized_name = name.lower().replace(" ", "_").strip()
+            normalized_name = self._normalize_lookup_key(name)
             possible_matches = list(self.lookup.get(category, {}).keys())
 
             return self.matching_strategy.find_match(normalized_name, possible_matches)
@@ -257,41 +271,216 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
             raise GetSubgraphError() from e
 
 
-
 class EnhancedOntologyResolver(RDFLibOntologyResolver):
     """Resolver customizado que extrai rdfs:label para melhorar o match de entidades."""
-    
+
     def __init__(
         self,
         ontology_file: Optional[Union[str, List[str], IO, List[IO]]] = None,
         matching_strategy: Optional[MatchingStrategy] = None,
     ) -> None:
-        # Importa a estratégia customizada para evitar dependência circular
-        from cognee.modules.ontology.matching_strategies import SemanticMatchingStrategy
-        
-        # Se não passarem uma estratégia, usa a nossa Semantic
-        strategy = matching_strategy or SemanticMatchingStrategy()
-        super().__init__(ontology_file=ontology_file, matching_strategy=strategy)
+        super().__init__(ontology_file=ontology_file, matching_strategy=matching_strategy)
 
     def build_lookup(self) -> None:
         super().build_lookup()
-        
+
         if not getattr(self, "graph", None):
             return
-            
+
         # Lista com as propriedades que queremos extrair como chaves de busca
         propriedades_de_texto = [RDFS.label, SKOS.altLabel]
-        
+
         # Para cada propriedade (label e altLabel), varremos a ontologia
         for propriedade in propriedades_de_texto:
             for subj, obj in self.graph.subject_objects(propriedade):
-                label_str = str(obj).lower()
-                
+                label_key = self._normalize_lookup_key(str(obj))
+                if not label_key:
+                    continue
+
                 # Associa a string encontrada à URI correspondente
                 if subj in self.lookup.get("classes", {}).values():
-                    self.lookup["classes"][label_str] = subj
-                    
+                    self.lookup["classes"][label_key] = subj
+
                 elif subj in self.lookup.get("individuals", {}).values():
-                    self.lookup["individuals"][label_str] = subj
-                    
+                    self.lookup["individuals"][label_key] = subj
+
         logger.info("Enhanced lookup applied: rdfs:labels and skos:altLabels added to index.")
+
+
+class EmbeddingEnhancedOntologyResolver(EnhancedOntologyResolver):
+    """Hybrid resolver that uses label matching first and embedding similarity as fallback."""
+
+    embedding_model_name = "ibm-granite/granite-embedding-278m-multilingual"
+    similarity_threshold = 0.9
+    batch_size = 32
+    max_sequence_length = 512
+
+    def __init__(
+        self,
+        ontology_file: Optional[Union[str, List[str], IO, List[IO]]] = None,
+        matching_strategy: Optional[MatchingStrategy] = None,
+    ) -> None:
+        self._embedding_candidates: Dict[str, List[OntologyEmbeddingCandidate]] = {
+            "classes": [],
+            "individuals": [],
+        }
+        self._embedding_matrices: Dict[str, numpy.ndarray] = {}
+        self._query_embedding_cache: Dict[str, Optional[numpy.ndarray]] = {}
+        self._embedding_backend_available: Optional[bool] = None
+        self._tokenizer = None
+        self._model = None
+        self._torch = None
+        self._device = "cpu"
+        self._tokenizer_max_length = self.max_sequence_length
+
+        super().__init__(ontology_file=ontology_file, matching_strategy=matching_strategy)
+
+    def build_lookup(self) -> None:
+        super().build_lookup()
+        self._embedding_candidates = {"classes": [], "individuals": []}
+        self._embedding_matrices = {}
+        self._query_embedding_cache = {}
+
+        if not getattr(self, "graph", None):
+            return
+
+        for category in ("classes", "individuals"):
+            unique_uris = list(dict.fromkeys(self.lookup.get(category, {}).values()))
+            self._embedding_candidates[category] = [
+                OntologyEmbeddingCandidate(key=self._uri_to_key(uri), text=embedding_text)
+                for uri in unique_uris
+                if (embedding_text := self._build_embedding_text(uri))
+            ]
+
+    def find_closest_match(self, name: str, category: str) -> Optional[str]:
+        text_match = super().find_closest_match(name, category)
+        if text_match:
+            return text_match
+
+        return self._find_embedding_match(name, category)
+
+    def _build_embedding_text(self, uri: URIRef) -> str:
+        labels: List[str] = []
+        for predicate in (RDFS.label, SKOS.altLabel):
+            for label in self.graph.objects(uri, predicate):
+                cleaned_label = str(label).strip()
+                if cleaned_label:
+                    labels.append(cleaned_label)
+
+        return " ; ".join(dict.fromkeys(labels))
+
+    def _prepare_embedding_query(self, name: str) -> str:
+        return name.replace("_", " ").strip()
+
+    def _ensure_embedding_backend(self) -> bool:
+        if self._embedding_backend_available is not None:
+            return self._embedding_backend_available
+
+        try:
+            import torch
+            from transformers import AutoModel, AutoTokenizer
+        except ImportError as error:
+            logger.warning(
+                "Embedding fallback disabled because torch/transformers are unavailable: %s",
+                str(error),
+            )
+            self._embedding_backend_available = False
+            return False
+
+        try:
+            self._torch = torch
+            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+            self._tokenizer = AutoTokenizer.from_pretrained(self.embedding_model_name)
+            self._model = AutoModel.from_pretrained(self.embedding_model_name).to(self._device)
+            self._model.eval()
+
+            model_max_length = getattr(
+                self._tokenizer, "model_max_length", self.max_sequence_length
+            )
+            if not isinstance(model_max_length, int) or model_max_length <= 0:
+                model_max_length = self.max_sequence_length
+
+            self._tokenizer_max_length = min(model_max_length, self.max_sequence_length)
+            self._embedding_backend_available = True
+        except Exception as error:
+            logger.warning(
+                "Embedding fallback disabled because model '%s' could not be loaded: %s",
+                self.embedding_model_name,
+                str(error),
+            )
+            self._embedding_backend_available = False
+
+        return self._embedding_backend_available
+
+    def _encode_texts(self, texts: List[str]) -> numpy.ndarray:
+        if not texts or not self._ensure_embedding_backend():
+            return numpy.empty((0, 0))
+
+        batches: List[numpy.ndarray] = []
+        with self._torch.no_grad():
+            for start in range(0, len(texts), self.batch_size):
+                batch = texts[start : start + self.batch_size]
+                tokenized = self._tokenizer(
+                    batch,
+                    padding=True,
+                    truncation=True,
+                    max_length=self._tokenizer_max_length,
+                    return_tensors="pt",
+                )
+                tokenized = {key: value.to(self._device) for key, value in tokenized.items()}
+
+                model_output = self._model(**tokenized)
+                batch_embeddings = model_output[0][:, 0]
+                batch_embeddings = self._torch.nn.functional.normalize(batch_embeddings, dim=1)
+                batches.append(batch_embeddings.cpu().numpy())
+
+        return numpy.vstack(batches)
+
+    def _get_category_embeddings(self, category: str) -> numpy.ndarray:
+        if category not in self._embedding_matrices:
+            candidates = self._embedding_candidates.get(category, [])
+            texts = [candidate.text for candidate in candidates]
+            self._embedding_matrices[category] = self._encode_texts(texts)
+
+        return self._embedding_matrices[category]
+
+    def _get_query_embedding(self, name: str) -> Optional[numpy.ndarray]:
+        query_text = self._prepare_embedding_query(name)
+        if not query_text:
+            return None
+
+        if query_text not in self._query_embedding_cache:
+            encoded_query = self._encode_texts([query_text])
+            self._query_embedding_cache[query_text] = (
+                encoded_query[0] if encoded_query.size else None
+            )
+
+        return self._query_embedding_cache[query_text]
+
+    def _find_embedding_match(self, name: str, category: str) -> Optional[str]:
+        candidates = self._embedding_candidates.get(category, [])
+        if not candidates:
+            return None
+
+        query_embedding = self._get_query_embedding(name)
+        candidate_embeddings = self._get_category_embeddings(category)
+        if query_embedding is None or candidate_embeddings.size == 0:
+            return None
+
+        similarity_scores = candidate_embeddings @ query_embedding
+        best_index = int(similarity_scores.argmax())
+        best_score = float(similarity_scores[best_index])
+        best_match = candidates[best_index]
+
+        logger.info(
+            "Best embedding match for '%s' in category '%s' is '%s' with score %.4f",
+            name,
+            category,
+            best_match.key,
+            best_score,
+        )
+
+        if best_score >= self.similarity_threshold:
+            return best_match.key
+
+        return None
