@@ -377,7 +377,7 @@ def test_get_ontology_resolver_from_env_unsupported_resolver():
         )
 
     assert "Unsupported ontology resolver: unsupported" in str(exc_info.value)
-    assert "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching." in str(
+    assert "Supported resolvers are: rdflib with fuzzy, labeld, or embedding matching." in str(
         exc_info.value
     )
 
@@ -490,14 +490,14 @@ def test_get_ontology_resolver_from_env_with_actual_file():
     assert resolver.ontology_file == "/path/to/ontology.owl"
 
 
-def test_get_ontology_resolver_from_env_hybrid():
-    """Test get_ontology_resolver_from_env supports the hybrid resolver."""
+def test_get_ontology_resolver_from_env_embedding():
+    """Test get_ontology_resolver_from_env supports the embedding resolver."""
     from cognee.modules.ontology.get_default_ontology_resolver import get_ontology_resolver_from_env
     from cognee.modules.ontology.matching_strategies import FuzzyMatchingStrategy
 
     resolver = get_ontology_resolver_from_env(
         ontology_resolver="rdflib",
-        matching_strategy="hybrid",
+        matching_strategy="embedding",
         ontology_file_path="/path/to/ontology.owl",
     )
 

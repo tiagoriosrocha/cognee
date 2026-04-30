@@ -24,14 +24,14 @@ def get_ontology_resolver_from_env(
 
     This factory supports RDFLib resolvers with three matching modes:
     - fuzzy: URI/local-name lookup with fuzzy text matching
-    - semantic: label/altLabel-aware text lookup
-    - hybrid: label/altLabel-aware text lookup plus embedding fallback
+    - labeld: label/altLabel-aware text lookup
+    - embedding: label/altLabel-aware text lookup plus embedding fallback
 
     Args:
         ontology_resolver (str): The ontology resolver type to use.
             Supported value: "rdflib".
         matching_strategy (str): The matching strategy to apply.
-            Supported values: "fuzzy", "semantic", "hybrid", "embedding".
+            Supported values: "fuzzy", "labeld", "embedding".
         ontology_file_path (str): Path to the ontology file(s) required for the resolver.
             Can be a single path or comma-separated paths for multiple files.
 
@@ -45,7 +45,7 @@ def get_ontology_resolver_from_env(
     if ontology_resolver != "rdflib" or not ontology_file_path:
         raise EnvironmentError(
             f"Unsupported ontology resolver: {ontology_resolver}. "
-            "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching."
+            "Supported resolvers are: rdflib with fuzzy, labeld, or embedding matching."
         )
 
     if "," in ontology_file_path:
@@ -70,5 +70,5 @@ def get_ontology_resolver_from_env(
 
     raise EnvironmentError(
         f"Unsupported ontology resolver: {ontology_resolver}. "
-        "Supported resolvers are: rdflib with fuzzy, semantic, or hybrid matching."
+        "Supported resolvers are: rdflib with fuzzy, labeld, or embedding matching."
     )

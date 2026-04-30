@@ -1,7 +1,9 @@
+import difflib
 import os
-from dataclasses import dataclass
 from collections import deque
+from dataclasses import dataclass
 from typing import List, Tuple, Dict, Optional, Any, Union, IO
+
 import numpy
 from rdflib import Graph, URIRef, RDF, RDFS, OWL, SKOS
 
@@ -34,6 +36,8 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
     This implementation uses RDFLib to parse and work with RDF/OWL ontology files.
     It provides fuzzy matching and subgraph extraction capabilities for ontology entities.
     """
+
+    max_logged_comparisons = 50
 
     def __init__(
         self,
@@ -129,36 +133,116 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
     def _normalize_lookup_key(self, value: str) -> str:
         return normalize_lookup_key(value)
 
+    def _get_text_matching_log_label(self) -> str:
+        return "fuzzy"
+
+    def _set_lookup_entry(self, category: str, key: str, uri: URIRef, source: str) -> None:
+        self.lookup[category][key] = uri
+        existing_sources = self.lookup_sources[category].setdefault(key, [])
+        if source not in existing_sources:
+            existing_sources.append(source)
+
+    def _get_candidate_sources(self, category: str, candidate_key: str) -> str:
+        sources = self.lookup_sources.get(category, {}).get(candidate_key, [])
+        return ", ".join(sources) if sources else "unknown"
+
+    def _log_text_comparisons(self, name: str, normalized_name: str, category: str) -> None:
+        strategy_label = self._get_text_matching_log_label()
+        candidates = list(self.lookup.get(category, {}).keys())
+
+        logger.info(
+            "[%s] Starting textual matching for input='%s' normalized='%s' category='%s' candidates=%d",
+            strategy_label,
+            name,
+            normalized_name,
+            category,
+            len(candidates),
+        )
+
+        if not candidates:
+            logger.info("[%s] No candidates available for category '%s'", strategy_label, category)
+            return
+
+        scored_candidates = [
+            (
+                candidate,
+                difflib.SequenceMatcher(None, normalized_name, candidate).ratio(),
+                self._get_candidate_sources(category, candidate),
+            )
+            for candidate in candidates
+        ]
+        scored_candidates.sort(key=lambda item: item[1], reverse=True)
+
+        for candidate, similarity_score, sources in scored_candidates[
+            : self.max_logged_comparisons
+        ]:
+            logger.info(
+                "[%s] Compared input='%s' with candidate='%s' sources='%s' similarity=%.4f",
+                strategy_label,
+                normalized_name,
+                candidate,
+                sources,
+                similarity_score,
+            )
+
+        if len(scored_candidates) > self.max_logged_comparisons:
+            logger.info(
+                "[%s] Comparison log truncated: showing top %d of %d candidates",
+                strategy_label,
+                self.max_logged_comparisons,
+                len(scored_candidates),
+            )
+
+    def _log_text_match_result(
+        self, name: str, normalized_name: str, category: str, matched_candidate: Optional[str]
+    ) -> None:
+        strategy_label = self._get_text_matching_log_label()
+        if matched_candidate:
+            logger.info(
+                "[%s] Final textual match for input='%s' normalized='%s' category='%s': candidate='%s' sources='%s'",
+                strategy_label,
+                name,
+                normalized_name,
+                category,
+                matched_candidate,
+                self._get_candidate_sources(category, matched_candidate),
+            )
+        else:
+            logger.info(
+                "[%s] No textual match found for input='%s' normalized='%s' category='%s'",
+                strategy_label,
+                name,
+                normalized_name,
+                category,
+            )
+
     def build_lookup(self) -> None:
         try:
-            classes: Dict[str, URIRef] = {}
-            individuals: Dict[str, URIRef] = {}
+            self.lookup: Dict[str, Dict[str, URIRef]] = {
+                "classes": {},
+                "individuals": {},
+            }
+            self.lookup_sources: Dict[str, Dict[str, List[str]]] = {
+                "classes": {},
+                "individuals": {},
+            }
 
             if not self.graph:
-                self.lookup: Dict[str, Dict[str, URIRef]] = {
-                    "classes": classes,
-                    "individuals": individuals,
-                }
-
                 return None
 
             for cls in self.graph.subjects(RDF.type, OWL.Class):
                 key = self._uri_to_key(cls)
-                classes[key] = cls
+                self._set_lookup_entry("classes", key, cls, "uri")
 
             for subj, _, obj in self.graph.triples((None, RDF.type, None)):
-                if obj in classes.values():
+                if obj in self.lookup["classes"].values():
                     key = self._uri_to_key(subj)
-                    individuals[key] = subj
+                    self._set_lookup_entry("individuals", key, subj, "uri")
 
-            self.lookup = {
-                "classes": classes,
-                "individuals": individuals,
-            }
             logger.info(
                 "Lookup built: %d classes, %d individuals",
-                len(classes),
-                len(individuals),
+                len(self.lookup["classes"]),
+                len(self.lookup["individuals"]),
             )
 
             return None
@@ -175,7 +259,11 @@ class RDFLibOntologyResolver(BaseOntologyResolver):
             normalized_name = self._normalize_lookup_key(name)
             possible_matches = list(self.lookup.get(category, {}).keys())
 
-            return self.matching_strategy.find_match(normalized_name, possible_matches)
+            self._log_text_comparisons(name, normalized_name, category)
+            matched_candidate = self.matching_strategy.find_match(normalized_name, possible_matches)
+            self._log_text_match_result(name, normalized_name, category, matched_candidate)
+
+            return matched_candidate
         except Exception as e:
             logger.error("Error in find_closest_match: %s", str(e))
             raise FindClosestMatchError() from e
@@ -287,28 +375,29 @@ class EnhancedOntologyResolver(RDFLibOntologyResolver):
         if not getattr(self, "graph", None):
             return
 
-        # Lista com as propriedades que queremos extrair como chaves de busca
-        propriedades_de_texto = [RDFS.label, SKOS.altLabel]
-
-        # Para cada propriedade (label e altLabel), varremos a ontologia
-        for propriedade in propriedades_de_texto:
+        for propriedade, source_name in (
+            (RDFS.label, "rdfs:label"),
+            (SKOS.altLabel, "skos:altLabel"),
+        ):
             for subj, obj in self.graph.subject_objects(propriedade):
                 label_key = self._normalize_lookup_key(str(obj))
                 if not label_key:
                     continue
 
-                # Associa a string encontrada à URI correspondente
                 if subj in self.lookup.get("classes", {}).values():
-                    self.lookup["classes"][label_key] = subj
+                    self._set_lookup_entry("classes", label_key, subj, source_name)
 
                 elif subj in self.lookup.get("individuals", {}).values():
-                    self.lookup["individuals"][label_key] = subj
+                    self._set_lookup_entry("individuals", label_key, subj, source_name)
 
         logger.info("Enhanced lookup applied: rdfs:labels and skos:altLabels added to index.")
 
+    def _get_text_matching_log_label(self) -> str:
+        return "labeld"
+
 
 class EmbeddingEnhancedOntologyResolver(EnhancedOntologyResolver):
-    """Hybrid resolver that uses label matching first and embedding similarity as fallback."""
+    """Resolver that uses label/altLabel text lookup first, then embedding similarity."""
 
     embedding_model_name = "ibm-granite/granite-embedding-278m-multilingual"
     similarity_threshold = 0.9
@@ -351,13 +440,37 @@ class EmbeddingEnhancedOntologyResolver(EnhancedOntologyResolver):
                 for uri in unique_uris
                 if (embedding_text := self._build_embedding_text(uri))
             ]
+            logger.info(
+                "[embedding] Prepared %d embedding candidates for category '%s'",
+                len(self._embedding_candidates[category]),
+                category,
+            )
 
     def find_closest_match(self, name: str, category: str) -> Optional[str]:
+        logger.info(
+            "[embedding] Starting resolver flow for input='%s' category='%s': textual pre-check followed by embedding fallback if needed",
+            name,
+            category,
+        )
         text_match = super().find_closest_match(name, category)
         if text_match:
+            logger.info(
+                "[embedding] Textual pre-check matched input='%s' category='%s' with candidate='%s'. Embedding comparison skipped.",
+                name,
+                category,
+                text_match,
+            )
             return text_match
 
+        logger.info(
+            "[embedding] No textual pre-check match for input='%s' category='%s'. Proceeding to embedding comparison.",
+            name,
+            category,
+        )
         return self._find_embedding_match(name, category)
+
+    def _get_text_matching_log_label(self) -> str:
+        return "embedding:textual_precheck"
 
     def _build_embedding_text(self, uri: URIRef) -> str:
         labels: List[str] = []
@@ -460,14 +573,53 @@ class EmbeddingEnhancedOntologyResolver(EnhancedOntologyResolver):
     def _find_embedding_match(self, name: str, category: str) -> Optional[str]:
         candidates = self._embedding_candidates.get(category, [])
         if not candidates:
+            logger.info(
+                "[embedding] No embedding candidates available for input='%s' category='%s'",
+                name,
+                category,
+            )
             return None
+
+        query_text = self._prepare_embedding_query(name)
+        logger.info(
+            "[embedding] Comparing query_text='%s' against %d embedding candidates in category='%s' using model='%s' threshold=%.2f",
+            query_text,
+            len(candidates),
+            category,
+            self.embedding_model_name,
+            self.similarity_threshold,
+        )
 
         query_embedding = self._get_query_embedding(name)
         candidate_embeddings = self._get_category_embeddings(category)
         if query_embedding is None or candidate_embeddings.size == 0:
+            logger.info(
+                "[embedding] Embedding comparison aborted for input='%s' category='%s' because query or candidate embeddings are unavailable",
+                name,
+                category,
+            )
             return None
 
         similarity_scores = candidate_embeddings @ query_embedding
+        ranked_indexes = numpy.argsort(similarity_scores)[::-1]
+
+        for candidate_index in ranked_indexes[: self.max_logged_comparisons]:
+            candidate = candidates[int(candidate_index)]
+            logger.info(
+                "[embedding] Compared query_text='%s' with candidate_key='%s' candidate_text='%s' cosine_similarity=%.4f",
+                query_text,
+                candidate.key,
+                candidate.text,
+                float(similarity_scores[int(candidate_index)]),
+            )
+
+        if len(ranked_indexes) > self.max_logged_comparisons:
+            logger.info(
+                "[embedding] Comparison log truncated: showing top %d of %d candidates",
+                self.max_logged_comparisons,
+                len(ranked_indexes),
+            )
+
         best_index = int(similarity_scores.argmax())
         best_score = float(similarity_scores[best_index])
         best_match = candidates[best_index]
@@ -481,6 +633,21 @@ class EmbeddingEnhancedOntologyResolver(EnhancedOntologyResolver):
         )
 
         if best_score >= self.similarity_threshold:
+            logger.info(
+                "[embedding] Match accepted for input='%s' category='%s': candidate='%s' score=%.4f",
+                name,
+                category,
+                best_match.key,
+                best_score,
+            )
             return best_match.key
 
+        logger.info(
+            "[embedding] Match rejected for input='%s' category='%s': best candidate='%s' score=%.4f is below threshold %.2f",
+            name,
+            category,
+            best_match.key,
+            best_score,
+            self.similarity_threshold,
+        )
         return None
